@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Tree-Copula Variational Autoencoders"
+authors:
+  - family-names: Rachamim
+    given-names: Yarden
+  - family-names: Fine
+    given-names: Shai

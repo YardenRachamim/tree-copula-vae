@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+env/
+.python-version
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter / notebooks
+.ipynb_checkpoints/
+
+# ML / experiment artifacts
+checkpoints/
+models/
+outputs/
+wandb/
+*.wandb
+mlruns/
+mlartifacts/
+
+# Data files
+*.csv
+*.tsv
+*.parquet
+*.jsonl
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.hdf5
+*.zip
+*.tar
+*.tar.gz
+*.gz
+*.bin
+
+# Local datasets and generated content
+data/*
+!data/README.md
+outputs/
+!outputs/README.md
+
+# Editor / OS metadata
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
