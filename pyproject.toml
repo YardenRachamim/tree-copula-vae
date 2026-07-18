@@ -8,3 +8,25 @@ version = "0.1.0"
 description = "Scaffold for the tree-copula VAE project"
 readme = "README.md"
 requires-python = "==3.8"
+dependencies = [
+  "torch",
+  "numpy",
+  "scipy",
+  "networkx",
+  "statsmodels",
+  "scikit-learn",
+  "tqdm",
+  "pyro-ppl",
+  "dgl",
+  "mixedvines"
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["tree_copula_vae*"]
