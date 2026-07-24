@@ -20,7 +20,8 @@ dependencies = [
   "tqdm",
   "pyro-ppl",
   "dgl",
-  "mixedvines"
+  "mixedvines",
+  "pyrallis"
 ]
 
 [project.optional-dependencies]
