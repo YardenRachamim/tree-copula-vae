@@ -10,6 +10,8 @@ readme = "README.md"
 requires-python = "==3.8"
 dependencies = [
   "torch",
+  "lightning",
+  "torchvision",
   "numpy",
   "scipy",
   "networkx",

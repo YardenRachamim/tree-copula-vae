@@ -161,8 +161,106 @@ def safe_edge_logits(edge_logits: torch.Tensor):
 
 
 def sample_soft_tree(edge_logits: torch.Tensor, temperature: float, num_nodes: int = None,):
-    return edge_logits
+    if num_nodes is None:
+        n_edges = edge_logits.size(-1)
+        num_nodes = int(round(0.5 + (0.25 + 2 * n_edges) ** 0.5))
+    weights = edge_logits.double() / temperature
+    clamped_logits = safe_edge_logits(weights)
+    edges = calculate_edge_kirchoff_marginals_using_grad(
+        weights=clamped_logits.view(-1, clamped_logits.size(-1)),
+        num_vertices=num_nodes,
+    )
+    edges = edges.view(*edge_logits.size()).to(edge_logits.dtype)
+    soft_mwst = edges.clamp(1e-6, 1)
+    return soft_mwst, edge_logits
 
 
 def maximum_weighted_spanning_tree(*args, **kwargs):
-    return None
+    edge_logits = kwargs.get("edge_logits")
+    if edge_logits is None and args:
+        edge_logits = args[0]
+    if edge_logits is None:
+        raise ValueError("edge_logits must be provided")
+    if edge_logits.ndim > 2:
+        raise ValueError(f"edge logits must be at most 2 dims, found {edge_logits.ndim}")
+
+    n_pairs = edge_logits.size(-1)
+    n_nodes = int(round(0.5 + (0.25 + 2 * n_pairs) ** 0.5))
+    if n_nodes * (n_nodes - 1) // 2 != n_pairs:
+        raise ValueError(
+            f"edge_logits.size(-1)={n_pairs} is not n(n-1)/2 for any integer n; inferred n_nodes={n_nodes}"
+        )
+
+    edge_weights = edge_logits.double().cpu().numpy()
+    if not np.isfinite(edge_weights).all():
+        raise ValueError("edge_logits contain non-finite values")
+
+    complete_graph = make_complete_graph(num_vertices=n_nodes)
+    batch_size = 1 if edge_logits.ndim == 1 else edge_logits.size(0)
+
+    ordered_adj = np.zeros((batch_size, n_nodes, n_nodes))
+    ordered_edge_weights = -edge_weights
+    ordered_adj[..., complete_graph[0, :], complete_graph[1, :]] = ordered_edge_weights
+    ordered_adj[..., complete_graph[1, :], complete_graph[0, :]] = ordered_edge_weights
+    sparse_ordered = block_diag(ordered_adj, format="csr")
+    spanning_tree = minimum_spanning_tree(csgraph=sparse_ordered).astype(bool)
+
+    params_adj = np.zeros((batch_size, n_nodes, n_nodes))
+    params_adj[..., complete_graph[0, :], complete_graph[1, :]] = edge_weights
+    params_adj[..., complete_graph[1, :], complete_graph[0, :]] = edge_weights
+    sparse_params = block_diag(params_adj, format="csr")
+
+    symmetric_tree = spanning_tree.maximum(spanning_tree.T)
+    sparse_tree_params = sparse_params.multiply(symmetric_tree)
+    adj_matrices = torch.from_numpy(
+        split_sparse_block(sparse_tree_params, n_block=batch_size, n_nodes=n_nodes)
+    ).to(edge_logits.device)
+    return get_edge_tensor(adj_matrix=adj_matrices).bool().to(dtype=edge_logits.dtype)
+
+
+def sample_hard_tree(
+    edge_logits: torch.Tensor,
+    n_latent_samples: int = 1,
+    inject_gumbel_noise: bool = True,
+    take_mean_tree: bool = True,
+):
+    if edge_logits.ndim != 2:
+        raise ValueError("Expecting edge_logits to be 2 dimensional (batch_size, n_edges)")
+
+    if inject_gumbel_noise:
+        gumbel_dist = Gumbel(edge_logits, scale=torch.ones_like(edge_logits))
+        edge_weights = gumbel_dist.rsample(torch.Size([n_latent_samples]))
+        if take_mean_tree:
+            edge_weights = edge_weights.mean(0)
+    else:
+        edge_weights = edge_logits
+
+    is_edge_weight_zero = edge_weights == 0
+    edge_weights = edge_weights.clone()
+    edge_weights[is_edge_weight_zero] = 1e-6
+    with torch.no_grad():
+        mwst = maximum_weighted_spanning_tree(edge_logits=edge_weights.view(-1, edge_weights.size(-1)))
+        mwst = mwst.view(*edge_weights.size())
+    return mwst, edge_weights
+
+
+def sample_tree_from_uniform_dist(
+    n_samples: int,
+    n_nodes: int,
+    device,
+    dtype,
+    as_edge_indicator: bool = True,
+):
+    logits = torch.ones(n_nodes)
+    tree_uni_dist = Categorical(logits=logits)
+    prufer_seq = tree_uni_dist.sample(torch.Size([n_samples, n_nodes - 2]))
+    trees = np.array([list(nx.from_prufer_sequence(list(seq.numpy())).edges()) for seq in prufer_seq])
+    graph = torch.zeros(n_samples, n_nodes, n_nodes, device=device, dtype=dtype)
+    for i, tree in enumerate(trees):
+        v1, v2 = tree.T
+        graph[i, v1, v2] = 1
+        graph[i, v2, v1] = 1
+    if as_edge_indicator:
+        return get_edge_tensor(graph)
+    return graph
+
