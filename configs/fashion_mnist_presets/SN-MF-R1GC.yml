@@ -1,0 +1,55 @@
+training_params:
+  max_epochs: 50
+  check_val_every_n_epoch: 1
+  batch_size: 128
+  hidden_dim: 4
+  beta: 1.0
+  lr: 0.001
+  betas: [0.95, 0.999]
+  name: FashionMnist
+  logger_save_dir: /data/yarden/experiments/
+  seed: 42
+data:
+  data_dir: /home/yarden/TreeCopulaNew/data/
+  batch_size: 128
+  pin_memory: true
+  num_workers: 4
+  # observed_distribution_type: Gaussian
+  observed_distribution_type: ContinuousBernoulli
+model:
+  model_type: MF_VAE
+  input_dim: 784
+  hidden_dim: 4
+  learning_rate: 0.001
+  kl_coeff: 0.0
+  K_eval: 50
+  K_test: 512
+  decoder_rank: 1
+  learn_prior_marginals: false
+callbacks:
+  kl_annealing:
+    warmup_epochs: 25
+    max_beta: 1.0
+  model_checkpoint:
+    monitor: val/elbo
+    mode: max
+    save_top_k: 1
+    save_last: true
+  log_reconstruction_grid: false
+  learning_rate_monitor: true
+trainer:
+  accelerator: gpu
+  devices: [2]
+  precision: 32
+  gradient_clip_val: 0.5
+  deterministic: false
+  log_every_n_steps: 50
+  min_epochs: 1
+  detect_anomaly: false
+checkpoint:
+  resume_training: false
+  monitor_in_same_experiment: false
+  ckpt_dir_format: /data/yarden/experiments/checkpoints/{}/mf_vae/last.ckpt
+  run_id: null
+eps: 0.000001
+train_generative_part: true
