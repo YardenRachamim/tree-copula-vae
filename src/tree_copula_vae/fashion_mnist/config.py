@@ -8,6 +8,7 @@ from tree_copula_vae.common.config import (
     BaseDataConfig,
     BaseTrainerConfig,
 )
+from tree_copula_vae.common.copulas import PairCopulaType
 
 
 class ModelType(str, Enum):
@@ -70,6 +71,7 @@ class MFVAEConfig(BaseModelConfig):
 class VTreeCopulaVAE2Config(BaseModelConfig):
     """VTreeCopulaVAE2 model configuration with copula-specific parameters."""
     model_type: ModelType = ModelType.VTREE_COPULA_VAE2
+    pair_copula_type: PairCopulaType = PairCopulaType.BiVariateGaussianCopula
     start_temperature: float = 2.0
     use_copula_prior: bool = True
     inject_noise: bool = False

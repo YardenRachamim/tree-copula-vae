@@ -14,7 +14,6 @@ class BaseTrainingParamsConfig:
     beta: float = 1.0
     lr: float = 1e-3
     betas: Tuple[float, float] = (0.95, 0.999)
-    warmup: int = 0
     name: str = 'Default'
     logger_save_dir: str = "./experiments/"
     seed: int = 42

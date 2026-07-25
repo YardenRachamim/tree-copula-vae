@@ -1,12 +1,11 @@
 training_params:
-  max_epochs: 20
+  max_epochs: 50
   check_val_every_n_epoch: 1
   batch_size: 128
   hidden_dim: 4
   beta: 1.0
   lr: 0.001
   betas: [0.95, 0.999]
-  warmup: 0
   name: FashionMnist
   logger_save_dir: /data/yarden/experiments/
   seed: 42
@@ -15,9 +14,11 @@ data:
   batch_size: 128
   pin_memory: true
   num_workers: 4
+  # observed_distribution_type: Gaussian
   observed_distribution_type: ContinuousBernoulli
 model:
   model_type: VTREE_COPULA_VAE2
+  pair_copula_type: BiVariateStudentTCopula
   input_dim: 784
   hidden_dim: 4
   learning_rate: 0.001
@@ -25,11 +26,11 @@ model:
   K_eval: 50
   K_test: 512
   decoder_rank: 1
-  learn_prior_marginals: true
+  learn_prior_marginals: false
   start_temperature: 2.0
-  use_copula_prior: true
+  use_copula_prior: false
   inject_noise: false
-  use_soft_mi: false
+  use_soft_mi: true
   learn_copula_prior_tree_prior: false
 callbacks:
   kl_annealing:
@@ -49,7 +50,7 @@ callbacks:
   learning_rate_monitor: true
 trainer:
   accelerator: gpu
-  devices: [3]
+  devices: [2]
   precision: 32
   gradient_clip_val: 0.5
   deterministic: false

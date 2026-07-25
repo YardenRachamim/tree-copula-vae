@@ -7,6 +7,7 @@ from .config import (
     BaseDataConfig,
     BaseTrainerConfig,
 )
+from .copulas import PairCopulaType
 
 __all__ = [
     "BaseTrainingParamsConfig",
@@ -14,4 +15,5 @@ __all__ = [
     "AnnealAttributeCallbackConfig",
     "BaseDataConfig",
     "BaseTrainerConfig",
+    "PairCopulaType",
 ]
