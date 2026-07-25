@@ -24,9 +24,15 @@ class BaseModelConfig:
     latent_dim: int = 3
     learning_rate: float = 0.005
     kl_coeff: float = 0.0
+    K_eval: int = 50
+    K_test: int = 512
     decoder_rank: int = 0
     use_nf_prior: bool = False
     use_copula_decoder: bool = False
+    pair_copula_type: PairCopulaType = PairCopulaType.BiVariateGaussianCopula
+    start_temperature: float = 2.0
+    inject_noise: bool = False
+    use_copula_prior: bool = False
 
 
 @dataclass
@@ -40,9 +46,6 @@ class MeanFieldVAEConfig(BaseModelConfig):
 class CopulaVAEConfig(BaseModelConfig):
     """CopulaVAE model configuration with copula-specific parameters."""
     model_type: ModelType = ModelType.COPULA_VAE
-    pair_copula_type: PairCopulaType = PairCopulaType.BiVariateGaussianCopula
-    start_temperature: float = 2.0
-    use_copula_prior: bool = False
 
 
 @dataclass
@@ -81,10 +84,20 @@ class AnnealAttributeCallbackConfig(AnnealAttributeCallbackConfig):
 
 
 @dataclass
+class ModelCheckpointCallbackConfig:
+    """ModelCheckpoint callback configuration."""
+    monitor: str = "val/elbo"
+    mode: str = "max"
+    save_top_k: int = 1
+    save_last: bool = True
+
+
+@dataclass
 class CallbacksConfig:
     """All callbacks configuration."""
     kl_annealing: KLAnnealingCallbackConfig = field(default_factory=KLAnnealingCallbackConfig)
     anneal_attribute: AnnealAttributeCallbackConfig = field(default_factory=AnnealAttributeCallbackConfig)
+    model_checkpoint: ModelCheckpointCallbackConfig = field(default_factory=ModelCheckpointCallbackConfig)
     learning_rate_monitor: bool = True
 
 
@@ -101,10 +114,10 @@ class TrainerConfig(BaseTrainerConfig):
 @dataclass
 class CheckpointConfig:
     """Checkpoint management configuration."""
-    monitor: str = "val/elbo"
-    mode: str = "max"
-    save_top_k: int = 1
-    save_last: bool = False
+    resume_training: bool = False
+    monitor_in_same_experiment: bool = False
+    ckpt_dir_format: str = "/home/yarden/gpufs/experiments/checkpoints/{}/screw_stage1/last.ckpt"
+    run_id: Optional[str] = None
 
 
 @dataclass
@@ -112,13 +125,19 @@ class Config:
     """Main configuration dataclass nesting all sub-configs for DSprite Screw."""
     training_params: TrainingParamsConfig = field(default_factory=TrainingParamsConfig)
     data: DataConfig = field(default_factory=DataConfig)
-    model: Union[MeanFieldVAEConfig, CopulaVAEConfig] = field(default_factory=MeanFieldVAEConfig)
+    model: BaseModelConfig = field(default_factory=BaseModelConfig)
     callbacks: CallbacksConfig = field(default_factory=CallbacksConfig)
     trainer: TrainerConfig = field(default_factory=TrainerConfig)
     checkpoint: CheckpointConfig = field(default_factory=CheckpointConfig)
     
     def __post_init__(self):
         """Validate configuration consistency."""
+        if self.checkpoint.monitor_in_same_experiment and not self.checkpoint.resume_training:
+            raise ValueError(
+                "Invalid combination of arguments - if 'monitor_in_same_experiment' "
+                "then 'resume_training' must be true as well"
+            )
+
         # Ensure latent_dim matches hidden_dim
         if self.model.latent_dim != self.training_params.hidden_dim:
             raise ValueError(
@@ -126,12 +145,3 @@ class Config:
                 f"training_params.hidden_dim ({self.training_params.hidden_dim})"
             )
         
-        # Ensure model type matches config type
-        if isinstance(self.model, MeanFieldVAEConfig) and self.model.model_type != ModelType.MEAN_FIELD_VAE:
-            raise ValueError(
-                f"MeanFieldVAEConfig requires model_type=MEAN_FIELD_VAE, got {self.model.model_type}"
-            )
-        if isinstance(self.model, CopulaVAEConfig) and self.model.model_type != ModelType.COPULA_VAE:
-            raise ValueError(
-                f"CopulaVAEConfig requires model_type=COPULA_VAE, got {self.model.model_type}"
-            )
