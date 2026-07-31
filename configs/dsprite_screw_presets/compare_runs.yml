@@ -1,0 +1,17 @@
+copula:
+  entity: datascienceinstitue
+  project: lightning_logs
+  run_id: 5kvvey7t
+  config_filename: null
+  checkpoint_path: null
+mean_field:
+  entity: datascienceinstitue
+  project: lightning_logs
+  run_id: gz6lfjo1
+  config_filename: null
+  checkpoint_path: null
+output_entity: datascienceinstitue
+output_project: lightning_logs
+device: cpu
+output_dir: null
+num_examples: 32

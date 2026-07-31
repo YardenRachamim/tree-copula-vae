@@ -121,6 +121,49 @@ class CheckpointConfig:
 
 
 @dataclass
+class ComparisonSourceRunConfig:
+    """A source run used in a dSprite Screw model comparison."""
+    entity: Optional[str] = None
+    project: Optional[str] = None
+    run_id: Optional[str] = None
+    config_filename: Optional[str] = None
+    checkpoint_path: Optional[str] = None
+
+
+@dataclass
+class DspriteScrewComparisonConfig:
+    """Configuration for a CopulaVAE versus MeanFieldVAE comparison run."""
+    copula: ComparisonSourceRunConfig = field(default_factory=ComparisonSourceRunConfig)
+    mean_field: ComparisonSourceRunConfig = field(default_factory=ComparisonSourceRunConfig)
+    output_entity: Optional[str] = None
+    output_project: Optional[str] = None
+    device: str = "cuda"
+    output_dir: Optional[str] = None
+    num_examples: int = 32
+
+    def __post_init__(self):
+        for source_name, source in (("copula", self.copula), ("mean_field", self.mean_field)):
+            missing_fields = [
+                field_name
+                for field_name in ("entity", "project", "run_id")
+                if not getattr(source, field_name)
+            ]
+            if missing_fields:
+                raise ValueError(
+                    "Comparison {} source requires {}.".format(
+                        source_name,
+                        ", ".join("{}.{}".format(source_name, field_name) for field_name in missing_fields),
+                    )
+                )
+        if not self.output_entity or not self.output_project:
+            raise ValueError("Comparison requires output_entity and output_project.")
+        if self.copula.run_id == self.mean_field.run_id:
+            raise ValueError("Copula and mean-field source run IDs must differ.")
+        if self.num_examples < 1:
+            raise ValueError("num_examples must be at least 1.")
+
+
+@dataclass
 class Config:
     """Main configuration dataclass nesting all sub-configs for DSprite Screw."""
     training_params: TrainingParamsConfig = field(default_factory=TrainingParamsConfig)
