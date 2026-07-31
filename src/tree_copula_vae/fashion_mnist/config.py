@@ -132,6 +132,37 @@ class CheckpointConfig:
 
 
 @dataclass
+class WandbRunConfig:
+    """W&B run selection for post-training analysis."""
+    entity: Optional[str] = None
+    project: Optional[str] = None
+    run_id: Optional[str] = None
+    config_filename: Optional[str] = None
+
+
+@dataclass
+class TreeAnalysisConfig:
+    """Configuration for latent-tree analysis of a trained Fashion-MNIST model."""
+    wandb: WandbRunConfig = field(default_factory=WandbRunConfig)
+    checkpoint_path: Optional[str] = None
+    device: str = "cuda"
+    output_dir: Optional[str] = None
+
+    def __post_init__(self):
+        missing_fields = [
+            field_name
+            for field_name in ("entity", "project", "run_id")
+            if not getattr(self.wandb, field_name)
+        ]
+        if missing_fields:
+            raise ValueError(
+                "Tree analysis requires W&B {}.".format(
+                    ", ".join("wandb.{}".format(field_name) for field_name in missing_fields)
+                )
+            )
+
+
+@dataclass
 class Config:
     """Main configuration dataclass nesting all sub-configs."""
     training_params: TrainingParamsConfig = field(default_factory=TrainingParamsConfig)

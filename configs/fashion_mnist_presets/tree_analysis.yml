@@ -1,0 +1,8 @@
+wandb:
+  entity: datascienceinstitue
+  project: lightning_logs
+  run_id: r1hdnlf9
+  config_filename: null
+checkpoint_path: null
+device: cpu
+output_dir: null
