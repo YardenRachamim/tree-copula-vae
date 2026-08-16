@@ -15,6 +15,160 @@
         <li><a href="https://github.com/YardenRachamim/tree-copula-vae/tree/main">Source code</a></li>
         <li><a href="assets/uai2026_a0_poster.pdf">Poster</a></li>
       </ul>
+      <section class="method-figure" id="method-figure" aria-labelledby="method-title">
+        <header class="method-figure-header">
+          <div>
+            <p class="figure-kicker">The tree is input-specific.</p>
+            <h2 id="method-title">Structured latent inference</h2>
+          </div>
+          <button class="replay-button" id="method-replay" type="button">Replay</button>
+        </header>
+
+        <p class="figure-message">Hard tree for sampling. Soft trees for learning.</p>
+
+        <div class="temperature-control">
+          <label for="tree-temperature">Temperature (&tau;)</label>
+          <input
+            id="tree-temperature"
+            type="range"
+            min="0.08"
+            max="1.45"
+            step="0.01"
+            value="1.15"
+            aria-describedby="temperature-description"
+          />
+          <output id="temperature-value" for="tree-temperature">1.15</output>
+          <span class="sr-only" id="temperature-description">Controls the concentration of the soft distribution over spanning trees for both samples.</span>
+        </div>
+
+        <div class="method-workbench" aria-label="Interactive tree-copula training visualization">
+          <article class="input-stage input-stage-a flow-stage" data-step="inputs" aria-label="Schematic input A">
+            <span class="stage-kicker">Input A</span>
+            <svg class="schematic-tile" viewBox="0 0 88 88" aria-hidden="true">
+              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
+              <path class="input-shape input-shape-a" d="M28 62c5-13 8-27 23-34 7-3 13 0 11 7-3 7-12 8-15 14-4 7 2 10 10 8"></path>
+              <circle class="input-dot" cx="31" cy="64" r="4"></circle>
+            </svg>
+            <span class="schematic-note">schematic</span>
+          </article>
+
+          <article class="input-stage input-stage-b flow-stage" data-step="inputs" aria-label="Schematic input B">
+            <span class="stage-kicker">Input B</span>
+            <svg class="schematic-tile" viewBox="0 0 88 88" aria-hidden="true">
+              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
+              <path class="input-shape input-shape-b" d="M23 62 48 26l16 10-25 28Z"></path>
+              <path class="input-detail" d="m32 58 21-26M39 62l20-24"></path>
+            </svg>
+            <span class="schematic-note">schematic</span>
+          </article>
+
+          <div class="shared-encoder" data-step="encoder" aria-label="Shared encoder">
+            <span class="stage-kicker">Encoder</span>
+            <div class="encoder-core" aria-hidden="true"><span>f</span><sub>&phi;</sub></div>
+            <span class="shared-note">shared</span>
+          </div>
+
+          <article class="dependence-stage dependence-stage-a flow-stage" data-step="scores" aria-labelledby="dependence-a-title">
+            <header class="stage-heading">
+              <span id="dependence-a-title">Pairwise dependence</span>
+              <span class="sample-tag">A</span>
+            </header>
+            <div class="score-views">
+              <div class="graph-target" id="score-graph-a"></div>
+              <div class="matrix-target" id="score-matrix-a"></div>
+            </div>
+          </article>
+
+          <article class="dependence-stage dependence-stage-b flow-stage" data-step="scores" aria-labelledby="dependence-b-title">
+            <header class="stage-heading">
+              <span id="dependence-b-title">Pairwise dependence</span>
+              <span class="sample-tag">B</span>
+            </header>
+            <div class="score-views">
+              <div class="graph-target" id="score-graph-b"></div>
+              <div class="matrix-target" id="score-matrix-b"></div>
+            </div>
+          </article>
+
+          <article class="tree-stage tree-stage-a flow-stage" data-step="hard" aria-label="Tree selection for input A">
+            <section class="tree-panel hard-panel">
+              <header class="tree-heading">
+                <span>Hard MWST</span>
+                <small>posterior structure</small>
+              </header>
+              <div class="graph-target tree-graph-target" id="hard-graph-a"></div>
+            </section>
+            <section class="tree-panel soft-panel" data-step="soft">
+              <header class="tree-heading">
+                <span>Soft tree marginals</span>
+                <small>training surrogate</small>
+              </header>
+              <div class="graph-target tree-graph-target" id="soft-graph-a"></div>
+            </section>
+          </article>
+
+          <article class="tree-stage tree-stage-b flow-stage" data-step="hard" aria-label="Tree selection for input B">
+            <section class="tree-panel hard-panel">
+              <header class="tree-heading">
+                <span>Hard MWST</span>
+                <small>posterior structure</small>
+              </header>
+              <div class="graph-target tree-graph-target" id="hard-graph-b"></div>
+            </section>
+            <section class="tree-panel soft-panel" data-step="soft">
+              <header class="tree-heading">
+                <span>Soft tree marginals</span>
+                <small>training surrogate</small>
+              </header>
+              <div class="graph-target tree-graph-target" id="soft-graph-b"></div>
+            </section>
+          </article>
+
+          <article class="sample-stage sample-stage-a flow-stage" data-step="samples" aria-label="Latent sample from input A hard tree">
+            <header class="stage-heading"><span>Sample (z)</span></header>
+            <div class="graph-target sample-graph-target" id="sample-graph-a"></div>
+          </article>
+
+          <article class="sample-stage sample-stage-b flow-stage" data-step="samples" aria-label="Latent sample from input B hard tree">
+            <header class="stage-heading"><span>Sample (z)</span></header>
+            <div class="graph-target sample-graph-target" id="sample-graph-b"></div>
+          </article>
+
+          <div class="shared-decoder" data-step="decoder" aria-label="Shared decoder">
+            <span class="stage-kicker">Decoder</span>
+            <div class="decoder-core" aria-hidden="true"><span>p</span><sub>&theta;</sub></div>
+            <span class="shared-note">shared</span>
+          </div>
+
+          <article class="reconstruction-stage reconstruction-stage-a flow-stage" data-step="recon" aria-label="Schematic reconstruction A">
+            <span class="stage-kicker">Reconstruction A</span>
+            <svg class="schematic-tile reconstruction-tile" viewBox="0 0 88 88" aria-hidden="true">
+              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
+              <path class="input-shape input-shape-a reconstruction-shape" d="M29 61c5-12 9-26 22-33 8-4 13 0 11 7-3 7-12 8-15 14-4 7 3 10 10 8"></path>
+              <circle class="input-dot reconstruction-dot" cx="32" cy="63" r="4"></circle>
+            </svg>
+            <span class="schematic-note">schematic</span>
+          </article>
+
+          <article class="reconstruction-stage reconstruction-stage-b flow-stage" data-step="recon" aria-label="Schematic reconstruction B">
+            <span class="stage-kicker">Reconstruction B</span>
+            <svg class="schematic-tile reconstruction-tile" viewBox="0 0 88 88" aria-hidden="true">
+              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
+              <path class="input-shape input-shape-b reconstruction-shape" d="M24 61 48 27l16 10-24 27Z"></path>
+              <path class="input-detail reconstruction-detail" d="m33 57 20-25M40 61l19-23"></path>
+            </svg>
+            <span class="schematic-note">schematic</span>
+          </article>
+
+          <div class="training-feedback" data-step="feedback" aria-label="Differentiable training signal returning from the soft tree marginals to the encoder">
+            <span>differentiable training signal</span>
+            <i aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <div class="edge-tooltip" id="edge-tooltip" role="tooltip" hidden></div>
+        <div class="sr-only" id="method-status" aria-live="polite"></div>
+      </section>
       <section class="poster" aria-labelledby="poster-title">
         <h2 id="poster-title">Poster</h2>
         <a class="poster-preview" href="assets/uai2026_a0_poster.pdf" target="_blank" rel="noopener">
@@ -23,5 +177,6 @@
         <a class="poster-pdf-link" href="assets/uai2026_a0_poster.pdf" target="_blank" rel="noopener">View / download full-resolution poster (PDF)</a>
       </section>
     </main>
+    <script src="method-visualization.js" defer></script>
   </body>
 </html>
