@@ -4,6 +4,12 @@ Official implementation accompanying *Beyond Mean-Field: Tree-Copula Variational
 
 This project studies variational autoencoders whose posterior is a sample-specific tree copula instead of a mean-field Gaussian. Candidate pairwise dependencies are scored by the encoder, a maximum-weight spanning tree (MWST) gives the hard posterior structure, and Matrix-Tree/Kirchhoff marginals provide a differentiable soft-tree surrogate during training. The repository also includes factorized and rank-1 Gaussian-copula observation models, plus scripts for the paper's reconstruction-gap and latent-topology analyses.
 
+## Resources
+
+- [Project page](https://yardenrachamim.github.io/tree-copula-vae/)
+- [Paper: Beyond Mean-Field: Tree-Copula Variational Autoencoders for Structured Latent Dependencies](https://proceedings.mlr.press/v337/rachamim26a.html)
+- [Official GitHub repository](https://github.com/YardenRachamim/tree-copula-vae/tree/main)
+
 ## Repository layout
 
 - [configs](configs): runnable YAML presets for each reported dSprites and Fashion-MNIST model.
