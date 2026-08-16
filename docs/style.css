@@ -52,9 +52,21 @@ h1 {
   margin-bottom: 0.75rem;
 }
 
-.poster object {
+.poster-preview {
+  display: block;
+  margin: 0 auto;
+}
+
+.poster-preview img {
   display: block;
   width: 100%;
-  height: min(75vh, 900px);
+  height: auto;
   border: 1px solid #d1d5db;
+}
+
+.poster-pdf-link {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  text-align: center;
 }
