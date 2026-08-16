@@ -43,3 +43,18 @@ h1 {
 .links a:hover {
   text-decoration: underline;
 }
+
+.poster {
+  margin-top: 2rem;
+}
+
+.poster h2 {
+  margin-bottom: 0.75rem;
+}
+
+.poster object {
+  display: block;
+  width: 100%;
+  height: min(75vh, 900px);
+  border: 1px solid #d1d5db;
+}
