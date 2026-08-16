@@ -18,20 +18,15 @@
   ];
 
   const edgeById = new Map(edges.map((edge) => [edge.id, edge]));
+  const softProbabilityLabel = "Soft edge probabilities \u03b2(x, \u03c4)";
   const nodePositions = {
-    1: [132, 24],
-    2: [236, 86],
-    3: [186, 178],
-    4: [48, 134],
-  };
-  const sampleNodePositions = {
-    1: [66, 26],
-    2: [110, 72],
-    3: [85, 153],
-    4: [20, 116],
+    1: [180, 34],
+    2: [318, 116],
+    3: [225, 246],
+    4: [43, 173],
   };
 
-  // Deliberately schematic scores make the two explanatory topologies unambiguous.
+  // Deliberately schematic scores make the contrast between the two topologies clear.
   const samples = [
     {
       id: "a",
@@ -57,30 +52,33 @@
   const softMarginals = new Map();
   const hardTrees = new Map(samples.map((sample) => [sample.id, maximumSpanningTree(sample.demoScores)]));
 
+  let currentRepresentation = "scores";
   let highlightedEdge = null;
   let pinnedEdge = null;
   let replayToken = 0;
+  let hasAutoplayed = false;
 
   samples.forEach((sample) => {
-    renderGraph(`score-graph-${sample.id}`, sample, "score");
-    renderScoreMatrix(`score-matrix-${sample.id}`, sample);
-    renderGraph(`hard-graph-${sample.id}`, sample, "hard");
-    renderGraph(`soft-graph-${sample.id}`, sample, "soft");
-    renderGraph(`sample-graph-${sample.id}`, sample, "sample");
+    renderGraph(`dependency-graph-${sample.id}`, sample);
+    renderMatrix(`dependency-matrix-${sample.id}`, sample);
   });
 
   updateTemperature(Number(slider.value));
+  setRepresentation("scores");
+
   slider.addEventListener("input", () => {
     replayToken += 1;
+    showManualSoftState();
     updateTemperature(Number(slider.value));
-    figure.classList.add("has-manual-temperature");
+    status.textContent = `Soft tree probabilities updated for temperature ${Number(slider.value).toFixed(2)}`;
   });
   replayButton.addEventListener("click", replay);
 
-  figure.classList.add("is-animated");
-  window.setTimeout(() => {
-    replay();
-  }, 0);
+  if (reducedMotion.matches) {
+    showReducedMotionState();
+  } else {
+    observeForAutoplay();
+  }
 
   function enumerateSpanningTrees() {
     const trees = [];
@@ -171,38 +169,36 @@
     return element;
   }
 
-  function renderGraph(targetId, sample, kind) {
+  function svgText(attributes, text) {
+    const element = svgElement("text", attributes);
+    element.textContent = text;
+    return element;
+  }
+
+  function renderGraph(targetId, sample) {
     const target = figure.querySelector(`#${targetId}`);
-    const isSample = kind === "sample";
-    const positions = isSample ? sampleNodePositions : nodePositions;
     const svg = svgElement("svg", {
-      class: `latent-graph latent-graph--${kind}`,
-      viewBox: isSample ? "0 0 132 182" : "0 0 284 204",
+      class: "latent-graph",
+      viewBox: "0 0 360 280",
       role: "img",
-      "aria-label": `${sample.name} ${kind} latent graph`,
+      "aria-label": `${sample.name} illustrative latent dependence graph`,
     });
     const hardTree = hardTrees.get(sample.id);
 
     edges.forEach((edge, edgeIndex) => {
-      if (kind === "sample" && !hardTree.has(edge.id)) {
-        return;
-      }
-
+      const [startX, startY] = nodePositions[edge.a];
+      const [endX, endY] = nodePositions[edge.b];
       const group = svgElement("g", {
-        class: `graph-edge graph-edge--${kind}`,
+        class: "graph-edge",
         "data-edge": edge.id,
         "data-sample": sample.id,
         tabindex: "0",
         role: "button",
-        "aria-label": edgeAriaLabel(sample, edge.id, kind),
+        "aria-label": edgeAriaLabel(sample, edge.id),
         style: `--edge-index:${edgeIndex}`,
       });
-      if (kind === "hard" || kind === "sample") {
-        group.classList.add(hardTree.has(edge.id) ? "is-hard-selected" : "is-hard-unselected");
-      }
+      group.classList.toggle("is-hard-selected", hardTree.has(edge.id));
 
-      const [startX, startY] = positions[edge.a];
-      const [endX, endY] = positions[edge.b];
       const hitLine = svgElement("line", {
         class: "edge-hit",
         x1: startX,
@@ -217,52 +213,35 @@
         x2: endX,
         y2: endY,
       });
-
-      if (kind === "score") {
-        const score = sample.demoScores[edge.id];
-        visualLine.style.strokeWidth = `${1.1 + score * 6.4}px`;
-        visualLine.style.opacity = `${0.18 + score * 0.82}`;
-      }
       group.append(hitLine, visualLine);
       attachEdgeInteractions(group, sample.id, edge.id);
       svg.append(group);
     });
 
     nodes.forEach((node) => {
-      const [x, y] = positions[node];
+      const [x, y] = nodePositions[node];
       const nodeGroup = svgElement("g", {
         class: "graph-node",
         "data-node": node,
         "data-sample": sample.id,
       });
-      const radius = isSample ? 25 : 18;
       nodeGroup.append(
-        svgElement("circle", { class: "node-disc", cx: x, cy: y, r: radius }),
-        svgText("text", { class: "node-symbol", x, y: kind === "sample" ? y - 5 : y + 4, "text-anchor": "middle" }, `z${node}`),
+        svgElement("circle", { class: "node-disc", cx: x, cy: y, r: 24 }),
+        svgText({ class: "node-symbol", x, y: y - 4, "text-anchor": "middle" }, `z${node}`),
+        svgText({ class: "node-value", x, y: y + 14, "text-anchor": "middle" }, sample.values[node]),
       );
-      if (kind === "sample") {
-        nodeGroup.append(
-          svgText("text", { class: "node-value", x, y: y + 13, "text-anchor": "middle" }, sample.values[node]),
-        );
-      }
       svg.append(nodeGroup);
     });
 
     target.replaceChildren(svg);
   }
 
-  function svgText(name, attributes, text) {
-    const element = svgElement(name, attributes);
-    element.textContent = text;
-    return element;
-  }
-
-  function renderScoreMatrix(targetId, sample) {
+  function renderMatrix(targetId, sample) {
     const target = figure.querySelector(`#${targetId}`);
     const grid = document.createElement("div");
     grid.className = "score-matrix";
     grid.setAttribute("role", "grid");
-    grid.setAttribute("aria-label", `${sample.name} symmetric pairwise score matrix`);
+    grid.setAttribute("aria-label", `${sample.name} pairwise dependence matrix`);
     grid.append(matrixLabel("", "matrix-corner"));
     nodes.forEach((node) => grid.append(matrixLabel(`z${node}`, "matrix-axis", "columnheader")));
 
@@ -274,19 +253,17 @@
           return;
         }
 
-        const edge = edgeIdFor(rowNode, columnNode);
-        const score = sample.demoScores[edge];
+        const edgeId = edgeIdFor(rowNode, columnNode);
         const button = document.createElement("button");
         button.type = "button";
         button.className = "matrix-cell";
-        button.dataset.edge = edge;
+        button.dataset.edge = edgeId;
         button.dataset.sample = sample.id;
-        button.style.setProperty("--score", score.toFixed(2));
-        button.style.setProperty("--edge-index", String(edges.findIndex((candidate) => candidate.id === edge)));
+        button.style.setProperty("--edge-index", String(edges.findIndex((edge) => edge.id === edgeId)));
         button.setAttribute("role", "gridcell");
-        button.setAttribute("aria-label", edgeAriaLabel(sample, edge, "score matrix"));
-        button.textContent = score.toFixed(2);
-        attachEdgeInteractions(button, sample.id, edge);
+        button.setAttribute("aria-label", edgeAriaLabel(sample, edgeId));
+        button.append(Object.assign(document.createElement("span"), { className: "sr-only", textContent: `z${rowNode} to z${columnNode}` }));
+        attachEdgeInteractions(button, sample.id, edgeId);
         grid.append(button);
       });
     });
@@ -307,10 +284,97 @@
     return [firstNode, secondNode].sort().join("");
   }
 
-  function edgeAriaLabel(sample, edgeId, representation) {
+  function updateTemperature(temperature) {
+    temperatureValue.value = temperature.toFixed(2);
+    temperatureValue.textContent = temperature.toFixed(2);
+    slider.setAttribute("aria-valuetext", `${temperature.toFixed(2)} temperature`);
+    samples.forEach((sample) => softMarginals.set(sample.id, calculateSoftMarginals(sample.demoScores, temperature)));
+
+    if (currentRepresentation !== "scores") {
+      applyRepresentation();
+    }
+    if (highlightedEdge) {
+      showTooltip(highlightedEdge.sampleId, highlightedEdge.edgeId, highlightedEdge.anchor);
+    }
+  }
+
+  function setRepresentation(representation) {
+    currentRepresentation = representation;
+    applyRepresentation();
+  }
+
+  function applyRepresentation() {
+    figure.dataset.representation = currentRepresentation;
+    figure.classList.toggle("is-soft-state", currentRepresentation === "soft");
+    figure.classList.toggle("is-hard-state", currentRepresentation === "hard");
+
+    samples.forEach((sample) => {
+      updateGraph(sample, currentRepresentation);
+      updateMatrix(sample, currentRepresentation === "scores" ? "scores" : "soft");
+      const representationLabel = figure.querySelector(`#representation-label-${sample.id}`);
+      representationLabel.textContent = currentRepresentation === "scores"
+        ? "Pairwise scores"
+        : currentRepresentation === "soft"
+          ? softProbabilityLabel
+          : "Hard MWST";
+    });
+  }
+
+  function updateGraph(sample, representation) {
+    const hardTree = hardTrees.get(sample.id);
+    const marginals = softMarginals.get(sample.id);
+    figure.querySelectorAll(`#dependency-graph-${sample.id} .graph-edge`).forEach((group) => {
+      const edgeId = group.dataset.edge;
+      const line = group.querySelector(".edge-line");
+      const isHardEdge = hardTree.has(edgeId);
+      let strength;
+
+      if (representation === "scores") {
+        strength = sample.demoScores[edgeId];
+        line.style.stroke = "#216d9c";
+        line.style.strokeWidth = `${1.2 + strength * 7}px`;
+        line.style.opacity = `${0.16 + strength * 0.84}`;
+      } else if (representation === "soft") {
+        strength = marginals[edgeId];
+        line.style.stroke = "#1b7994";
+        line.style.strokeWidth = `${1 + strength * 8}px`;
+        line.style.opacity = `${0.1 + strength * 0.9}`;
+      } else if (isHardEdge) {
+        line.style.stroke = "#0d7d77";
+        line.style.strokeWidth = "7px";
+        line.style.opacity = "1";
+      } else {
+        line.style.stroke = "#94a6b5";
+        line.style.strokeWidth = "1px";
+        line.style.opacity = "0.025";
+      }
+
+      line.style.strokeDasharray = "none";
+      group.classList.toggle("is-hard-hidden", representation === "hard" && !isHardEdge);
+      group.setAttribute("aria-label", edgeAriaLabel(sample, edgeId));
+    });
+  }
+
+  function updateMatrix(sample, matrixMode) {
+    const useSoftProbabilities = matrixMode === "soft";
+    const values = useSoftProbabilities ? softMarginals.get(sample.id) : sample.demoScores;
+    const caption = useSoftProbabilities ? softProbabilityLabel : "Pairwise scores";
+    const target = figure.querySelector(`#dependency-matrix-${sample.id}`);
+    const captionElement = figure.querySelector(`#matrix-caption-${sample.id}`);
+    captionElement.textContent = caption;
+    target.querySelectorAll(".matrix-cell").forEach((cell) => {
+      const value = values[cell.dataset.edge];
+      cell.style.setProperty("--strength", value.toFixed(4));
+      cell.setAttribute("aria-label", `${edgeAriaLabel(sample, cell.dataset.edge)}. ${caption}.`);
+    });
+    target.querySelector(".score-matrix").setAttribute("aria-label", `${sample.name} ${caption.toLowerCase()} matrix`);
+  }
+
+  function edgeAriaLabel(sample, edgeId) {
     const edge = edgeById.get(edgeId);
     const hardState = hardTrees.get(sample.id).has(edgeId) ? "selected by the hard MWST" : "not selected by the hard MWST";
-    return `z${edge.a} to z${edge.b}, pairwise score ${sample.demoScores[edgeId].toFixed(2)}, ${hardState}, ${representation}`;
+    const softProbability = softMarginals.get(sample.id)?.[edgeId] ?? 0;
+    return `Illustrative method example. z${edge.a} to z${edge.b}; pairwise score ${sample.demoScores[edgeId].toFixed(2)}; soft inclusion probability ${softProbability.toFixed(2)}; ${hardState}`;
   }
 
   function attachEdgeInteractions(element, sampleId, edgeId) {
@@ -379,72 +443,103 @@
     const edge = edgeById.get(edgeId);
     const softProbability = softMarginals.get(sampleId)[edgeId];
     const hardState = hardTrees.get(sampleId).has(edgeId) ? "selected" : "not selected";
-    tooltip.textContent = `z${edge.a} - z${edge.b}\n\npairwise score: ${sample.demoScores[edgeId].toFixed(2)}\nsoft P(edge): ${softProbability.toFixed(2)}\nhard MWST: ${hardState}`;
+    tooltip.textContent = `Illustrative method example\nz${edge.a} - z${edge.b}\n\npairwise score: ${sample.demoScores[edgeId].toFixed(2)}\nsoft P(edge): ${softProbability.toFixed(2)}\nhard MWST: ${hardState}`;
     tooltip.hidden = false;
 
     const rect = anchor.getBoundingClientRect();
-    const tooltipWidth = 190;
+    const tooltipWidth = 210;
     const left = Math.max(12, Math.min(rect.left + rect.width / 2 - tooltipWidth / 2, window.innerWidth - tooltipWidth - 12));
-    const top = Math.max(12, rect.top - 118);
+    const top = Math.max(12, rect.top - 135);
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
   }
 
-  function updateTemperature(temperature) {
-    temperatureValue.value = temperature.toFixed(2);
-    temperatureValue.textContent = temperature.toFixed(2);
-    slider.setAttribute("aria-valuetext", `${temperature.toFixed(2)} temperature`);
+  function setSampling(isSampling) {
+    figure.classList.toggle("is-sampling", isSampling);
+  }
 
-    samples.forEach((sample) => {
-      const marginals = calculateSoftMarginals(sample.demoScores, temperature);
-      softMarginals.set(sample.id, marginals);
-      const softGraph = figure.querySelector(`#soft-graph-${sample.id}`);
-      softGraph.querySelectorAll(".graph-edge").forEach((group) => {
-        const probability = marginals[group.dataset.edge];
-        const line = group.querySelector(".edge-line");
-        line.style.strokeWidth = `${1 + probability * 7}px`;
-        line.style.opacity = `${0.15 + probability * 0.85}`;
-        group.setAttribute("aria-label", `${edgeAriaLabel(sample, group.dataset.edge, "soft tree marginal")}, inclusion probability ${probability.toFixed(2)}`);
-      });
-    });
+  function showManualSoftState() {
+    figure.classList.remove("is-replaying", "is-complete", "is-hard-revealed", "feedback-pulse-active");
+    figure.classList.add("is-scores-revealed");
+    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.add("is-visible"));
+    setSampling(false);
+    setRepresentation("soft");
+  }
 
-    if (highlightedEdge) {
-      showTooltip(highlightedEdge.sampleId, highlightedEdge.edgeId, highlightedEdge.anchor);
+  function showReducedMotionState() {
+    const lowTemperature = Number(slider.min) + 0.04;
+    slider.value = lowTemperature.toFixed(2);
+    updateTemperature(lowTemperature);
+    setRepresentation("hard");
+    figure.classList.add("is-scores-revealed", "is-hard-revealed", "is-complete");
+    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.add("is-visible"));
+    status.textContent = "Interactive method visualization ready";
+  }
+
+  function observeForAutoplay() {
+    if (!("IntersectionObserver" in window)) {
+      return;
     }
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!hasAutoplayed && entry.isIntersecting && entry.intersectionRatio >= 0.45) {
+          hasAutoplayed = true;
+          observer.disconnect();
+          replay();
+          break;
+        }
+      }
+    }, { threshold: [0.45] });
+    observer.observe(figure);
   }
 
   async function replay() {
     const token = ++replayToken;
     const highTemperature = Number(slider.max);
     const lowTemperature = Number(slider.min) + 0.04;
-    figure.classList.remove("has-manual-temperature");
-    figure.classList.remove("is-complete");
     figure.classList.add("is-replaying");
-    figure.classList.remove("feedback-pulse-active");
+    figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
     figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
     pinnedEdge = null;
     clearHighlight();
+    setSampling(false);
+    slider.value = highTemperature.toFixed(2);
     updateTemperature(highTemperature);
+    setRepresentation("scores");
 
-    if (!await revealStep("inputs", "Showing two inputs", 330, token)) return;
-    if (!await revealStep("encoder", "Shared encoder predicts pairwise dependence", 330, token)) return;
-    if (!await revealStep("scores", "Revealing candidate latent graphs and score matrices", 620, token)) return;
-    if (!await revealStep("hard", "Selecting the hard maximum-weight spanning trees", 440, token)) return;
-    if (!await revealStep("soft", "Showing soft tree marginals used for training", 300, token)) return;
+    if (!await revealStep("inputs", "Showing two inputs", 300, token)) return;
+    if (!await revealStep("encoder", "Activating the shared encoder", 340, token)) return;
+    if (!await revealStep("nodes", "Revealing latent variables for both inputs", 280, token)) return;
 
-    status.textContent = "Sharpening the soft tree distribution";
-    const completedTemperature = await animateTemperature(highTemperature, lowTemperature, reducedMotion.matches ? 0 : 1100, token);
-    if (!completedTemperature) return;
+    figure.classList.add("is-scores-revealed");
+    status.textContent = "Revealing pairwise scores and their matching heatmaps";
+    if (!await pause(540, token)) return;
+    if (!await revealStep("fork", "Splitting the same pairwise scores into hard and soft uses", 300, token)) return;
+    if (!await revealStep("soft", "Entering the differentiable soft-tree training surrogate", 220, token)) return;
+
+    setRepresentation("soft");
+    status.textContent = "Sharpening soft edge probabilities as temperature falls";
+    if (!await animateTemperature(highTemperature, lowTemperature, reducedMotion.matches ? 0 : 1350, token)) return;
 
     figure.classList.add("feedback-pulse-active");
-    if (!await revealStep("feedback", "Sending the differentiable training signal back to the encoder", 430, token)) return;
+    if (!await revealStep("feedback", "Sending the differentiable training signal back to the encoder", 380, token)) return;
     figure.classList.remove("feedback-pulse-active");
-    if (!await revealStep("samples", "Sampling correlated latent values from the hard trees", 380, token)) return;
-    if (!await revealStep("decoder", "Passing samples through the shared decoder", 300, token)) return;
-    if (!await revealStep("recon", "Showing schematic reconstructions", 260, token)) return;
+
+    setRepresentation("hard");
+    figure.classList.add("is-hard-revealed");
+    status.textContent = "Selecting the hard maximum-weight spanning trees";
+    if (!await pause(420, token)) return;
+
+    setSampling(true);
+    status.textContent = "Sampling correlated latent values on the hard trees";
+    if (!await pause(640, token)) return;
+    setSampling(false);
+    if (!await revealStep("samples", "Passing samples through the posterior path", 250, token)) return;
+    if (!await revealStep("decoder", "Decoding both latent samples", 250, token)) return;
+    if (!await revealStep("recon", "Showing replaceable reconstruction endpoints", 220, token)) return;
 
     figure.classList.remove("is-replaying");
-  figure.classList.add("is-complete");
+    figure.classList.add("is-complete");
     status.textContent = "Interactive method visualization ready";
   }
 
@@ -454,17 +549,22 @@
     }
     figure.querySelectorAll(`[data-step="${step}"]`).forEach((element) => element.classList.add("is-visible"));
     status.textContent = message;
+    return pause(duration, token);
+  }
+
+  function pause(duration, token) {
     if (reducedMotion.matches || duration === 0) {
-      return token === replayToken;
+      return Promise.resolve(token === replayToken);
     }
-    await new Promise((resolve) => window.setTimeout(resolve, duration));
-    return token === replayToken;
+    return new Promise((resolve) => {
+      window.setTimeout(() => resolve(token === replayToken), duration);
+    });
   }
 
   function animateTemperature(start, end, duration, token) {
     return new Promise((resolve) => {
       if (duration === 0) {
-        slider.value = String(end);
+        slider.value = end.toFixed(2);
         updateTemperature(end);
         resolve(token === replayToken);
         return;
@@ -475,8 +575,7 @@
           resolve(false);
           return;
         }
-        const now = window.performance.now();
-        const progress = Math.min((now - startedAt) / duration, 1);
+        const progress = Math.min((window.performance.now() - startedAt) / duration, 1);
         const easedProgress = 1 - (1 - progress) * (1 - progress);
         const temperature = start + (end - start) * easedProgress;
         slider.value = temperature.toFixed(2);

@@ -19,47 +19,28 @@
         <header class="method-figure-header">
           <div>
             <p class="figure-kicker">The tree is input-specific.</p>
-            <h2 id="method-title">Structured latent inference</h2>
+            <h2 id="method-title">How does each input get its own latent tree?</h2>
+            <p class="figure-subtitle">The encoder predicts pairwise dependence; soft tree marginals make the discrete structure learnable.</p>
           </div>
-          <button class="replay-button" id="method-replay" type="button">Replay</button>
+          <div class="figure-actions">
+            <span class="illustrative-note">Illustrative method example</span>
+            <button class="replay-button" id="method-replay" type="button">Replay</button>
+          </div>
         </header>
 
         <p class="figure-message">Hard tree for sampling. Soft trees for learning.</p>
 
-        <div class="temperature-control">
-          <label for="tree-temperature">Temperature (&tau;)</label>
-          <input
-            id="tree-temperature"
-            type="range"
-            min="0.08"
-            max="1.45"
-            step="0.01"
-            value="1.15"
-            aria-describedby="temperature-description"
-          />
-          <output id="temperature-value" for="tree-temperature">1.15</output>
-          <span class="sr-only" id="temperature-description">Controls the concentration of the soft distribution over spanning trees for both samples.</span>
-        </div>
-
         <div class="method-workbench" aria-label="Interactive tree-copula training visualization">
-          <article class="input-stage input-stage-a flow-stage" data-step="inputs" aria-label="Schematic input A">
+          <article class="input-stage input-stage-a" data-step="inputs" aria-label="Replaceable schematic input A">
             <span class="stage-kicker">Input A</span>
-            <svg class="schematic-tile" viewBox="0 0 88 88" aria-hidden="true">
-              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
-              <path class="input-shape input-shape-a" d="M28 62c5-13 8-27 23-34 7-3 13 0 11 7-3 7-12 8-15 14-4 7 2 10 10 8"></path>
-              <circle class="input-dot" cx="31" cy="64" r="4"></circle>
-            </svg>
-            <span class="schematic-note">schematic</span>
+            <div class="media-placeholder media-placeholder--input" aria-hidden="true"><span>A</span></div>
+            <span class="schematic-note">replaceable</span>
           </article>
 
-          <article class="input-stage input-stage-b flow-stage" data-step="inputs" aria-label="Schematic input B">
+          <article class="input-stage input-stage-b" data-step="inputs" aria-label="Replaceable schematic input B">
             <span class="stage-kicker">Input B</span>
-            <svg class="schematic-tile" viewBox="0 0 88 88" aria-hidden="true">
-              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
-              <path class="input-shape input-shape-b" d="M23 62 48 26l16 10-25 28Z"></path>
-              <path class="input-detail" d="m32 58 21-26M39 62l20-24"></path>
-            </svg>
-            <span class="schematic-note">schematic</span>
+            <div class="media-placeholder media-placeholder--input" aria-hidden="true"><span>B</span></div>
+            <span class="schematic-note">replaceable</span>
           </article>
 
           <div class="shared-encoder" data-step="encoder" aria-label="Shared encoder">
@@ -68,70 +49,100 @@
             <span class="shared-note">shared</span>
           </div>
 
-          <article class="dependence-stage dependence-stage-a flow-stage" data-step="scores" aria-labelledby="dependence-a-title">
-            <header class="stage-heading">
-              <span id="dependence-a-title">Pairwise dependence</span>
-              <span class="sample-tag">A</span>
-            </header>
-            <div class="score-views">
-              <div class="graph-target" id="score-graph-a"></div>
-              <div class="matrix-target" id="score-matrix-a"></div>
-            </div>
-          </article>
-
-          <article class="dependence-stage dependence-stage-b flow-stage" data-step="scores" aria-labelledby="dependence-b-title">
-            <header class="stage-heading">
-              <span id="dependence-b-title">Pairwise dependence</span>
-              <span class="sample-tag">B</span>
-            </header>
-            <div class="score-views">
-              <div class="graph-target" id="score-graph-b"></div>
-              <div class="matrix-target" id="score-matrix-b"></div>
-            </div>
-          </article>
-
-          <article class="tree-stage tree-stage-a flow-stage" data-step="hard" aria-label="Tree selection for input A">
-            <section class="tree-panel hard-panel">
-              <header class="tree-heading">
-                <span>Hard MWST</span>
-                <small>posterior structure</small>
-              </header>
-              <div class="graph-target tree-graph-target" id="hard-graph-a"></div>
-            </section>
-            <section class="tree-panel soft-panel" data-step="soft">
-              <header class="tree-heading">
-                <span>Soft tree marginals</span>
+          <section class="dependence-region" aria-label="Input-specific latent dependence learning">
+            <div class="soft-learning-control" data-step="soft">
+              <div class="soft-learning-copy">
+                <span>Soft edge probabilities &beta;(x,&tau;)</span>
                 <small>training surrogate</small>
+              </div>
+              <div class="temperature-control">
+                <label for="tree-temperature">Temperature &tau;</label>
+                <div class="temperature-range">
+                  <span>softer / alternatives</span>
+                  <input
+                    id="tree-temperature"
+                    type="range"
+                    min="0.08"
+                    max="1.45"
+                    step="0.01"
+                    value="1.15"
+                    aria-describedby="temperature-description"
+                  />
+                  <span>near-hard</span>
+                </div>
+                <output id="temperature-value" for="tree-temperature">1.15</output>
+                <span class="sr-only" id="temperature-description">Controls the concentration of the illustrative soft distribution over spanning trees for both samples.</span>
+              </div>
+
+              <div class="training-feedback" data-step="feedback" aria-label="Differentiable training signal returning from soft tree marginals to the encoder">
+                <svg viewBox="0 0 240 62" aria-hidden="true">
+                  <path class="feedback-path" d="M232 10C194 53 70 60 14 24"></path>
+                  <path class="feedback-arrowhead" d="M18 16 8 25l13 4"></path>
+                  <circle class="feedback-pulse" cx="218" cy="18" r="3.5"></circle>
+                </svg>
+                <span>differentiable training signal</span>
+              </div>
+            </div>
+
+            <article class="dependence-stage dependence-stage-a" data-step="nodes" aria-labelledby="dependence-a-title">
+              <header class="dependence-heading">
+                <span id="dependence-a-title">Sample A</span>
+                <span class="representation-label" id="representation-label-a">Pairwise scores</span>
               </header>
-              <div class="graph-target tree-graph-target" id="soft-graph-a"></div>
-            </section>
+              <div class="evolving-views">
+                <div class="evolving-graph-wrap">
+                  <div class="graph-target" id="dependency-graph-a"></div>
+                  <div class="hard-state-label" id="hard-label-a" aria-live="polite">
+                    <b>Hard MWST</b>
+                    <small>posterior structure</small>
+                  </div>
+                </div>
+                <div class="matrix-wrap">
+                  <span class="matrix-caption" id="matrix-caption-a">Pairwise scores</span>
+                  <div class="matrix-target" id="dependency-matrix-a"></div>
+                </div>
+              </div>
+              <div class="branch-fork" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
+                <span class="fork-origin">scores</span>
+                <span class="fork-route fork-route--hard"><b>Hard MWST</b><small>posterior structure</small></span>
+                <span class="fork-route fork-route--soft"><b>Soft &beta;(x,&tau;)</b><small>training surrogate</small></span>
+              </div>
+            </article>
+
+            <article class="dependence-stage dependence-stage-b" data-step="nodes" aria-labelledby="dependence-b-title">
+              <header class="dependence-heading">
+                <span id="dependence-b-title">Sample B</span>
+                <span class="representation-label" id="representation-label-b">Pairwise scores</span>
+              </header>
+              <div class="evolving-views">
+                <div class="evolving-graph-wrap">
+                  <div class="graph-target" id="dependency-graph-b"></div>
+                  <div class="hard-state-label" id="hard-label-b" aria-live="polite">
+                    <b>Hard MWST</b>
+                    <small>posterior structure</small>
+                  </div>
+                </div>
+                <div class="matrix-wrap">
+                  <span class="matrix-caption" id="matrix-caption-b">Pairwise scores</span>
+                  <div class="matrix-target" id="dependency-matrix-b"></div>
+                </div>
+              </div>
+              <div class="branch-fork" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
+                <span class="fork-origin">scores</span>
+                <span class="fork-route fork-route--hard"><b>Hard MWST</b><small>posterior structure</small></span>
+                <span class="fork-route fork-route--soft"><b>Soft &beta;(x,&tau;)</b><small>training surrogate</small></span>
+              </div>
+            </article>
+          </section>
+
+          <article class="sample-stage sample-stage-a" data-step="samples" aria-label="Sample from input A hard-tree posterior">
+            <span class="stage-kicker">Sample z</span>
+            <span class="sample-equation">z ~ q<sub>&phi;</sub>(z|x)</span>
           </article>
 
-          <article class="tree-stage tree-stage-b flow-stage" data-step="hard" aria-label="Tree selection for input B">
-            <section class="tree-panel hard-panel">
-              <header class="tree-heading">
-                <span>Hard MWST</span>
-                <small>posterior structure</small>
-              </header>
-              <div class="graph-target tree-graph-target" id="hard-graph-b"></div>
-            </section>
-            <section class="tree-panel soft-panel" data-step="soft">
-              <header class="tree-heading">
-                <span>Soft tree marginals</span>
-                <small>training surrogate</small>
-              </header>
-              <div class="graph-target tree-graph-target" id="soft-graph-b"></div>
-            </section>
-          </article>
-
-          <article class="sample-stage sample-stage-a flow-stage" data-step="samples" aria-label="Latent sample from input A hard tree">
-            <header class="stage-heading"><span>Sample (z)</span></header>
-            <div class="graph-target sample-graph-target" id="sample-graph-a"></div>
-          </article>
-
-          <article class="sample-stage sample-stage-b flow-stage" data-step="samples" aria-label="Latent sample from input B hard tree">
-            <header class="stage-heading"><span>Sample (z)</span></header>
-            <div class="graph-target sample-graph-target" id="sample-graph-b"></div>
+          <article class="sample-stage sample-stage-b" data-step="samples" aria-label="Sample from input B hard-tree posterior">
+            <span class="stage-kicker">Sample z</span>
+            <span class="sample-equation">z ~ q<sub>&phi;</sub>(z|x)</span>
           </article>
 
           <div class="shared-decoder" data-step="decoder" aria-label="Shared decoder">
@@ -140,30 +151,17 @@
             <span class="shared-note">shared</span>
           </div>
 
-          <article class="reconstruction-stage reconstruction-stage-a flow-stage" data-step="recon" aria-label="Schematic reconstruction A">
-            <span class="stage-kicker">Reconstruction A</span>
-            <svg class="schematic-tile reconstruction-tile" viewBox="0 0 88 88" aria-hidden="true">
-              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
-              <path class="input-shape input-shape-a reconstruction-shape" d="M29 61c5-12 9-26 22-33 8-4 13 0 11 7-3 7-12 8-15 14-4 7 3 10 10 8"></path>
-              <circle class="input-dot reconstruction-dot" cx="32" cy="63" r="4"></circle>
-            </svg>
-            <span class="schematic-note">schematic</span>
+          <article class="reconstruction-stage reconstruction-stage-a" data-step="recon" aria-label="Replaceable schematic reconstruction A">
+            <span class="stage-kicker">Reconstruction</span>
+            <div class="media-placeholder media-placeholder--output" aria-hidden="true"><span>A</span></div>
+            <span class="schematic-note">replaceable</span>
           </article>
 
-          <article class="reconstruction-stage reconstruction-stage-b flow-stage" data-step="recon" aria-label="Schematic reconstruction B">
-            <span class="stage-kicker">Reconstruction B</span>
-            <svg class="schematic-tile reconstruction-tile" viewBox="0 0 88 88" aria-hidden="true">
-              <rect x="2" y="2" width="84" height="84" rx="6"></rect>
-              <path class="input-shape input-shape-b reconstruction-shape" d="M24 61 48 27l16 10-24 27Z"></path>
-              <path class="input-detail reconstruction-detail" d="m33 57 20-25M40 61l19-23"></path>
-            </svg>
-            <span class="schematic-note">schematic</span>
+          <article class="reconstruction-stage reconstruction-stage-b" data-step="recon" aria-label="Replaceable schematic reconstruction B">
+            <span class="stage-kicker">Reconstruction</span>
+            <div class="media-placeholder media-placeholder--output" aria-hidden="true"><span>B</span></div>
+            <span class="schematic-note">replaceable</span>
           </article>
-
-          <div class="training-feedback" data-step="feedback" aria-label="Differentiable training signal returning from the soft tree marginals to the encoder">
-            <span>differentiable training signal</span>
-            <i aria-hidden="true"></i>
-          </div>
         </div>
 
         <div class="edge-tooltip" id="edge-tooltip" role="tooltip" hidden></div>
