@@ -115,8 +115,8 @@
 
 .method-workbench {
   display: grid;
-  grid-template-columns: 68px 48px minmax(180px, 1fr) 48px 68px;
-  grid-template-rows: auto 76px 76px;
+  grid-template-columns: 68px 48px minmax(260px, 1fr) minmax(112px, 132px) minmax(110px, 0.45fr) 48px 68px;
+  grid-template-rows: auto minmax(220px, 1fr) minmax(220px, 1fr);
   column-gap: clamp(0.55rem, 1.4vw, 1rem);
   row-gap: 0.9rem;
   position: relative;
@@ -124,10 +124,10 @@
 }
 
 .input-stage,
-.shared-encoder,
+.encoder-stage,
 .dependence-region,
 .sample-stage,
-.shared-decoder,
+.decoder-stage,
 .reconstruction-stage {
   min-width: 0;
   position: relative;
@@ -142,15 +142,20 @@
   gap: 0.35rem;
 }
 
-.dependence-region { grid-column: 1 / 6; grid-row: 1; }
+.dependence-region { display: contents; }
+.soft-learning-control { grid-column: 1 / 8; grid-row: 1; }
 .input-stage-a { grid-column: 1; grid-row: 2; }
 .input-stage-b { grid-column: 1; grid-row: 3; }
-.shared-encoder { grid-column: 2; grid-row: 2 / 4; }
-.sample-stage-a { grid-column: 3; grid-row: 2; }
-.sample-stage-b { grid-column: 3; grid-row: 3; }
-.shared-decoder { grid-column: 4; grid-row: 2 / 4; }
-.reconstruction-stage-a { grid-column: 5; grid-row: 2; }
-.reconstruction-stage-b { grid-column: 5; grid-row: 3; }
+.encoder-stage-a { grid-column: 2; grid-row: 2; }
+.encoder-stage-b { grid-column: 2; grid-row: 3; }
+.dependence-stage-a { grid-column: 3 / 5; grid-row: 2; }
+.dependence-stage-b { grid-column: 3 / 5; grid-row: 3; }
+.sample-stage-a { grid-column: 5; grid-row: 2; }
+.sample-stage-b { grid-column: 5; grid-row: 3; }
+.decoder-stage-a { grid-column: 6; grid-row: 2; }
+.decoder-stage-b { grid-column: 6; grid-row: 3; }
+.reconstruction-stage-a { grid-column: 7; grid-row: 2; }
+.reconstruction-stage-b { grid-column: 7; grid-row: 3; }
 
 .media-placeholder {
   display: grid;
@@ -172,8 +177,8 @@
   border-color: #78aaa6;
 }
 
-.shared-encoder,
-.shared-decoder {
+.encoder-stage,
+.decoder-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -210,9 +215,9 @@
 }
 
 .input-stage::after,
-.shared-encoder::after,
+.encoder-stage::after,
 .sample-stage::before,
-.shared-decoder::before,
+.decoder-stage::before,
 .reconstruction-stage::before {
   position: absolute;
   top: 50%;
@@ -222,20 +227,20 @@
 }
 
 .input-stage::after,
-.shared-encoder::after {
+.encoder-stage::after {
   right: -0.7rem;
 }
 
 .sample-stage::before,
-.shared-decoder::before,
+.decoder-stage::before,
 .reconstruction-stage::before {
   left: -0.7rem;
 }
 
 .input-stage::before,
-.shared-encoder::before,
+.encoder-stage::before,
 .sample-stage::after,
-.shared-decoder::after,
+.decoder-stage::after,
 .reconstruction-stage::after {
   position: absolute;
   top: calc(50% - 3px);
@@ -247,12 +252,12 @@
 }
 
 .input-stage::before,
-.shared-encoder::before {
+.encoder-stage::before {
   right: -0.26rem;
 }
 
 .sample-stage::after,
-.shared-decoder::after,
+.decoder-stage::after,
 .reconstruction-stage::after {
   left: -0.26rem;
 }
@@ -398,12 +403,6 @@
 
 .feedback-pulse-active .feedback-pulse {
   animation: feedback-pulse 950ms ease-in-out infinite;
-}
-
-.dependence-region {
-  display: grid;
-  grid-template-rows: 76px minmax(220px, 1fr) minmax(220px, 1fr);
-  gap: 0.9rem;
 }
 
 .dependence-stage {
@@ -836,7 +835,7 @@
   }
 
   .method-workbench {
-    grid-template-columns: 58px 46px minmax(470px, 1fr) 52px 42px 58px;
+    grid-template-columns: 58px 44px minmax(220px, 1fr) 104px minmax(92px, 0.4fr) 44px 58px;
     column-gap: 0.5rem;
   }
 
@@ -866,31 +865,31 @@
     gap: 1.1rem 0.85rem;
   }
 
-  .input-stage-a { grid-column: 1; grid-row: 1; }
-  .input-stage-b { grid-column: 2; grid-row: 1; }
-  .shared-encoder { grid-column: 1 / 3; grid-row: 2; min-height: 76px; }
-  .dependence-region { grid-column: 1 / 3; grid-row: 3; }
+  .soft-learning-control { grid-column: 1 / 3; grid-row: 1; }
+  .input-stage-a { grid-column: 1; grid-row: 2; }
+  .encoder-stage-a { grid-column: 2; grid-row: 2; }
+  .dependence-stage-a { grid-column: 1 / 3; grid-row: 3; }
   .sample-stage-a { grid-column: 1; grid-row: 4; min-height: 80px; }
-  .sample-stage-b { grid-column: 2; grid-row: 4; min-height: 80px; }
-  .shared-decoder { grid-column: 1 / 3; grid-row: 5; min-height: 76px; }
-  .reconstruction-stage-a { grid-column: 1; grid-row: 6; }
-  .reconstruction-stage-b { grid-column: 2; grid-row: 6; }
+  .decoder-stage-a { grid-column: 2; grid-row: 4; }
+  .reconstruction-stage-a { grid-column: 1 / 3; grid-row: 5; }
+  .input-stage-b { grid-column: 1; grid-row: 6; }
+  .encoder-stage-b { grid-column: 2; grid-row: 6; }
+  .dependence-stage-b { grid-column: 1 / 3; grid-row: 7; }
+  .sample-stage-b { grid-column: 1; grid-row: 8; min-height: 80px; }
+  .decoder-stage-b { grid-column: 2; grid-row: 8; }
+  .reconstruction-stage-b { grid-column: 1 / 3; grid-row: 9; }
 
   .input-stage::before,
   .input-stage::after,
-  .shared-encoder::before,
-  .shared-encoder::after,
+  .encoder-stage::before,
+  .encoder-stage::after,
   .sample-stage::before,
   .sample-stage::after,
-  .shared-decoder::before,
-  .shared-decoder::after,
+  .decoder-stage::before,
+  .decoder-stage::after,
   .reconstruction-stage::before,
   .reconstruction-stage::after {
     display: none;
-  }
-
-  .dependence-region {
-    grid-template-rows: auto minmax(305px, 1fr) minmax(305px, 1fr);
   }
 
   .soft-learning-control {
@@ -952,10 +951,6 @@
 
   .training-feedback {
     display: none;
-  }
-
-  .dependence-region {
-    grid-template-rows: 122px minmax(330px, 1fr) minmax(330px, 1fr);
   }
 
   .evolving-views {

@@ -44,10 +44,14 @@
             <span class="schematic-note">replaceable</span>
           </article>
 
-          <div class="shared-encoder" data-step="encoder" aria-label="Shared encoder">
+          <div class="encoder-stage encoder-stage-a" data-step="encoder" aria-label="Encoder for input A">
             <span class="stage-kicker">Encoder</span>
             <div class="encoder-core" aria-hidden="true"><span>q<sub>&phi;</sub></span></div>
-            <span class="shared-note">shared</span>
+          </div>
+
+          <div class="encoder-stage encoder-stage-b" data-step="encoder" aria-label="Encoder for input B">
+            <span class="stage-kicker">Encoder</span>
+            <div class="encoder-core" aria-hidden="true"><span>q<sub>&phi;</sub></span></div>
           </div>
 
           <section class="dependence-region" aria-label="Input-specific latent dependence learning">
@@ -145,10 +149,14 @@
             <span class="sample-equation">z ~ q<sub>&phi;</sub>(z|x)</span>
           </article>
 
-          <div class="shared-decoder" data-step="decoder" aria-label="Shared decoder">
+          <div class="decoder-stage decoder-stage-a" data-step="decoder" aria-label="Decoder for input A">
             <span class="stage-kicker">Decoder</span>
             <div class="decoder-core" aria-hidden="true"><span>p<sub>&theta;</sub></span></div>
-            <span class="shared-note">shared</span>
+          </div>
+
+          <div class="decoder-stage decoder-stage-b" data-step="decoder" aria-label="Decoder for input B">
+            <span class="stage-kicker">Decoder</span>
+            <div class="decoder-core" aria-hidden="true"><span>p<sub>&theta;</sub></span></div>
           </div>
 
           <article class="reconstruction-stage reconstruction-stage-a" data-step="recon" aria-label="Replaceable schematic reconstruction A">
