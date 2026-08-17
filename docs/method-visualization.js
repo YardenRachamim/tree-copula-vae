@@ -43,6 +43,7 @@
 
   const slider = figure.querySelector("#tree-temperature");
   const temperatureValue = figure.querySelector("#temperature-value");
+  const epochCounter = figure.querySelector("#epoch-counter");
   const replayButton = figure.querySelector("#method-replay");
   const tooltip = figure.querySelector("#edge-tooltip");
   const status = figure.querySelector("#method-status");
@@ -69,6 +70,7 @@
     replayToken += 1;
     showManualSoftState();
     updateTemperature(Number(slider.value));
+    updateEpochCounter(1);
     status.textContent = `Soft tree probabilities updated for temperature ${Number(slider.value).toFixed(2)}`;
   });
   replayButton.addEventListener("click", replay);
@@ -504,6 +506,7 @@
     setSampling(false);
     slider.value = highTemperature.toFixed(2);
     updateTemperature(highTemperature);
+    updateEpochCounter(1);
     setRepresentation("scores");
 
     if (!await revealStep("inputs", "Showing two inputs", animationDuration(300), token)) return;
@@ -517,8 +520,8 @@
     if (!await revealStep("soft", "Entering the differentiable soft-tree training surrogate", animationDuration(220), token)) return;
 
     setRepresentation("soft");
-    status.textContent = "Sharpening soft edge probabilities as temperature falls";
-    if (!await animateTemperature(highTemperature, lowTemperature, animationDuration(1350), token)) return;
+    status.textContent = "Training for 20 epochs as temperature falls";
+    if (!await animateEpochs(highTemperature, lowTemperature, token)) return;
 
     figure.classList.add("feedback-pulse-active");
     if (!await revealStep("feedback", "Sending the differentiable training signal back to the encoder", animationDuration(380), token)) return;
@@ -560,30 +563,39 @@
     });
   }
 
-  function animateTemperature(start, end, duration, token) {
+  function updateEpochCounter(epoch) {
+    epochCounter.textContent = `Epoch ${epoch} / 20`;
+  }
+
+  function animateEpochs(start, end, token) {
     return new Promise((resolve) => {
-      if (duration === 0) {
+      const totalEpochs = 20;
+      const epochDuration = 500;
+      if (reducedMotion.matches) {
         slider.value = end.toFixed(2);
         updateTemperature(end);
+        updateEpochCounter(totalEpochs);
         resolve(token === replayToken);
         return;
       }
-      const startedAt = window.performance.now();
+
+      let epoch = 1;
       const tick = () => {
         if (token !== replayToken) {
           resolve(false);
           return;
         }
-        const progress = Math.min((window.performance.now() - startedAt) / duration, 1);
-        const easedProgress = 1 - (1 - progress) * (1 - progress);
-        const temperature = start + (end - start) * easedProgress;
+        const progress = (epoch - 1) / (totalEpochs - 1);
+        const temperature = start + (end - start) * progress;
         slider.value = temperature.toFixed(2);
         updateTemperature(temperature);
-        if (progress < 1) {
-          window.setTimeout(tick, 16);
+        updateEpochCounter(epoch);
+        if (epoch < totalEpochs) {
+          epoch += 1;
+          window.setTimeout(tick, epochDuration);
           return;
         }
-        resolve(true);
+        window.setTimeout(() => resolve(token === replayToken), epochDuration);
       };
       window.setTimeout(tick, 0);
     });

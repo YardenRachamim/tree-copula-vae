@@ -295,13 +295,26 @@
 }
 
 .temperature-control label {
-  grid-column: 1 / 3;
+  grid-column: 1;
+  grid-row: 1;
   color: var(--figure-ink);
+}
+
+.epoch-counter {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--figure-teal);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .temperature-range {
   display: grid;
   grid-template-columns: auto minmax(110px, 1fr) auto;
+  grid-column: 1;
+  grid-row: 2;
   align-items: center;
   gap: 0.38rem;
   min-width: 0;
@@ -321,7 +334,7 @@
   cursor: pointer;
 }
 
-.temperature-control output {
+.temperature-control #temperature-value {
   grid-column: 2;
   grid-row: 2;
   color: var(--figure-teal);
