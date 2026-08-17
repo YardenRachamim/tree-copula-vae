@@ -495,6 +495,7 @@
     const token = ++replayToken;
     const highTemperature = Number(slider.max);
     const lowTemperature = Number(slider.min) + 0.04;
+    const animationDuration = (duration) => reducedMotion.matches ? 0 : duration * 1.65;
     figure.classList.add("is-replaying");
     figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
     figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
@@ -505,36 +506,36 @@
     updateTemperature(highTemperature);
     setRepresentation("scores");
 
-    if (!await revealStep("inputs", "Showing two inputs", 300, token)) return;
-    if (!await revealStep("encoder", "Activating the shared encoder", 340, token)) return;
-    if (!await revealStep("nodes", "Revealing latent variables for both inputs", 280, token)) return;
+    if (!await revealStep("inputs", "Showing two inputs", animationDuration(300), token)) return;
+    if (!await revealStep("encoder", "Activating the shared encoder", animationDuration(340), token)) return;
+    if (!await revealStep("nodes", "Revealing latent variables for both inputs", animationDuration(280), token)) return;
 
     figure.classList.add("is-scores-revealed");
     status.textContent = "Revealing pairwise scores and their matching heatmaps";
-    if (!await pause(540, token)) return;
-    if (!await revealStep("fork", "Splitting the same pairwise scores into hard and soft uses", 300, token)) return;
-    if (!await revealStep("soft", "Entering the differentiable soft-tree training surrogate", 220, token)) return;
+    if (!await pause(animationDuration(540), token)) return;
+    if (!await revealStep("fork", "Splitting the same pairwise scores into hard and soft uses", animationDuration(300), token)) return;
+    if (!await revealStep("soft", "Entering the differentiable soft-tree training surrogate", animationDuration(220), token)) return;
 
     setRepresentation("soft");
     status.textContent = "Sharpening soft edge probabilities as temperature falls";
-    if (!await animateTemperature(highTemperature, lowTemperature, reducedMotion.matches ? 0 : 1350, token)) return;
+    if (!await animateTemperature(highTemperature, lowTemperature, animationDuration(1350), token)) return;
 
     figure.classList.add("feedback-pulse-active");
-    if (!await revealStep("feedback", "Sending the differentiable training signal back to the encoder", 380, token)) return;
+    if (!await revealStep("feedback", "Sending the differentiable training signal back to the encoder", animationDuration(380), token)) return;
     figure.classList.remove("feedback-pulse-active");
 
     setRepresentation("hard");
     figure.classList.add("is-hard-revealed");
     status.textContent = "Selecting the hard maximum-weight spanning trees";
-    if (!await pause(420, token)) return;
+    if (!await pause(animationDuration(420), token)) return;
 
     setSampling(true);
     status.textContent = "Sampling from the hard-tree posterior";
-    if (!await pause(640, token)) return;
-    if (!await revealStep("samples", "Passing samples through the posterior path", 250, token)) return;
+    if (!await pause(animationDuration(640), token)) return;
+    if (!await revealStep("samples", "Passing samples through the posterior path", animationDuration(250), token)) return;
     setSampling(false);
-    if (!await revealStep("decoder", "Decoding both latent samples", 250, token)) return;
-    if (!await revealStep("recon", "Showing replaceable reconstruction endpoints", 220, token)) return;
+    if (!await revealStep("decoder", "Decoding both latent samples", animationDuration(250), token)) return;
+    if (!await revealStep("recon", "Showing replaceable reconstruction endpoints", animationDuration(220), token)) return;
 
     figure.classList.remove("is-replaying");
     figure.classList.add("is-complete");
