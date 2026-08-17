@@ -27,17 +27,42 @@
     4: [43, 173],
   };
 
-  // Deliberately schematic scores make the contrast between the two topologies clear.
+  const totalEpochs = 10;
+  const trainingStates = {
+    a: [
+      { scores: { 12: 0.54, 13: 0.52, 14: 0.49, 23: 0.56, 24: 0.46, 34: 0.51 } },
+      { scores: { 12: 0.62, 13: 0.57, 14: 0.52, 23: 0.59, 24: 0.45, 34: 0.50 } },
+      { scores: { 12: 0.70, 13: 0.66, 14: 0.54, 23: 0.68, 24: 0.43, 34: 0.49 } },
+      { scores: { 12: 0.74, 13: 0.69, 14: 0.61, 23: 0.72, 24: 0.41, 34: 0.47 } },
+      { scores: { 12: 0.73, 13: 0.72, 14: 0.65, 23: 0.76, 24: 0.40, 34: 0.45 } },
+      { scores: { 12: 0.78, 13: 0.77, 14: 0.72, 23: 0.69, 24: 0.38, 34: 0.43 } },
+      { scores: { 12: 0.84, 13: 0.82, 14: 0.78, 23: 0.58, 24: 0.33, 34: 0.39 } },
+      { scores: { 12: 0.88, 13: 0.85, 14: 0.81, 23: 0.48, 24: 0.29, 34: 0.34 } },
+      { scores: { 12: 0.92, 13: 0.89, 14: 0.85, 23: 0.39, 24: 0.25, 34: 0.30 } },
+      { scores: { 12: 0.94, 13: 0.91, 14: 0.88, 23: 0.31, 24: 0.22, 34: 0.27 } },
+    ],
+    b: [
+      { scores: { 12: 0.53, 13: 0.51, 14: 0.48, 23: 0.55, 24: 0.50, 34: 0.52 } },
+      { scores: { 12: 0.60, 13: 0.57, 14: 0.49, 23: 0.58, 24: 0.55, 34: 0.56 } },
+      { scores: { 12: 0.66, 13: 0.61, 14: 0.52, 23: 0.64, 24: 0.62, 34: 0.60 } },
+      { scores: { 12: 0.69, 13: 0.63, 14: 0.71, 23: 0.67, 24: 0.59, 34: 0.65 } },
+      { scores: { 12: 0.74, 13: 0.56, 14: 0.62, 23: 0.75, 24: 0.52, 34: 0.72 } },
+      { scores: { 12: 0.79, 13: 0.48, 14: 0.46, 23: 0.81, 24: 0.45, 34: 0.78 } },
+      { scores: { 12: 0.83, 13: 0.40, 14: 0.34, 23: 0.86, 24: 0.40, 34: 0.82 } },
+      { scores: { 12: 0.86, 13: 0.35, 14: 0.26, 23: 0.89, 24: 0.37, 34: 0.85 } },
+      { scores: { 12: 0.88, 13: 0.32, 14: 0.20, 23: 0.91, 24: 0.35, 34: 0.87 } },
+      { scores: { 12: 0.89, 13: 0.30, 14: 0.17, 23: 0.93, 24: 0.34, 34: 0.88 } },
+    ],
+  };
+
   const samples = [
     {
       id: "a",
       name: "Input A",
-      demoScores: { 12: 0.94, 13: 0.88, 14: 0.84, 23: 0.31, 24: 0.22, 34: 0.27 },
     },
     {
       id: "b",
       name: "Input B",
-      demoScores: { 12: 0.88, 13: 0.3, 14: 0.17, 23: 0.92, 24: 0.35, 34: 0.86 },
     },
   ];
 
@@ -50,18 +75,22 @@
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const allTrees = enumerateSpanningTrees();
   const softMarginals = new Map();
-  const hardTrees = new Map(samples.map((sample) => [sample.id, maximumSpanningTree(sample.demoScores)]));
+  const currentScores = new Map();
+  const hardTrees = new Map();
 
   let currentRepresentation = "scores";
   let highlightedEdge = null;
   let pinnedEdge = null;
   let replayToken = 0;
+  let viewsRendered = false;
 
+  setTrainingState(0, 0, Number(slider.value));
   samples.forEach((sample) => {
     renderGraph(`dependency-graph-${sample.id}`, sample);
     renderMatrix(`dependency-matrix-${sample.id}`, sample);
   });
 
+  viewsRendered = true;
   updateTemperature(Number(slider.value));
   setRepresentation("scores");
 
@@ -69,7 +98,6 @@
     replayToken += 1;
     showManualSoftState();
     updateTemperature(Number(slider.value));
-    updateEpochCounter(1);
     status.textContent = `Soft tree probabilities updated for temperature ${Number(slider.value).toFixed(2)}`;
   });
   replayButton.addEventListener("click", replay);
@@ -282,7 +310,7 @@
     temperatureValue.value = temperature.toFixed(2);
     temperatureValue.textContent = temperature.toFixed(2);
     slider.setAttribute("aria-valuetext", `${temperature.toFixed(2)} temperature`);
-    samples.forEach((sample) => softMarginals.set(sample.id, calculateSoftMarginals(sample.demoScores, temperature)));
+    samples.forEach((sample) => softMarginals.set(sample.id, calculateSoftMarginals(currentScores.get(sample.id), temperature)));
 
     if (currentRepresentation !== "scores") {
       applyRepresentation();
@@ -324,7 +352,7 @@
       let strength;
 
       if (representation === "scores") {
-        strength = sample.demoScores[edgeId];
+        strength = currentScores.get(sample.id)[edgeId];
         line.style.stroke = "#216d9c";
         line.style.strokeWidth = `${1.2 + strength * 7}px`;
         line.style.opacity = `${0.16 + strength * 0.84}`;
@@ -351,7 +379,7 @@
 
   function updateMatrix(sample, matrixMode) {
     const useSoftProbabilities = matrixMode !== "scores";
-    const values = useSoftProbabilities ? softMarginals.get(sample.id) : sample.demoScores;
+    const values = useSoftProbabilities ? softMarginals.get(sample.id) : currentScores.get(sample.id);
     const caption = matrixMode === "hard" ? hardMatrixLabel : useSoftProbabilities ? softProbabilityLabel : "Pairwise scores";
     const target = figure.querySelector(`#dependency-matrix-${sample.id}`);
     const captionElement = figure.querySelector(`#matrix-caption-${sample.id}`);
@@ -368,7 +396,7 @@
     const edge = edgeById.get(edgeId);
     const hardState = hardTrees.get(sample.id).has(edgeId) ? "selected by the hard MWST" : "not selected by the hard MWST";
     const softProbability = softMarginals.get(sample.id)?.[edgeId] ?? 0;
-    return `Illustrative method example. z${edge.a} to z${edge.b}; pairwise score ${sample.demoScores[edgeId].toFixed(2)}; soft inclusion probability ${softProbability.toFixed(2)}; ${hardState}`;
+    return `Illustrative method example. z${edge.a} to z${edge.b}; pairwise score ${currentScores.get(sample.id)[edgeId].toFixed(2)}; soft inclusion probability ${softProbability.toFixed(2)}; ${hardState}`;
   }
 
   function attachEdgeInteractions(element, sampleId, edgeId) {
@@ -437,7 +465,7 @@
     const edge = edgeById.get(edgeId);
     const softProbability = softMarginals.get(sampleId)[edgeId];
     const hardState = hardTrees.get(sampleId).has(edgeId) ? "selected" : "not selected";
-    tooltip.textContent = `Illustrative method example\nz${edge.a} - z${edge.b}\n\npairwise score: ${sample.demoScores[edgeId].toFixed(2)}\nsoft P(edge): ${softProbability.toFixed(2)}\nhard MWST: ${hardState}`;
+    tooltip.textContent = `Illustrative method example\nz${edge.a} - z${edge.b}\n\npairwise score: ${currentScores.get(sampleId)[edgeId].toFixed(2)}\nsoft P(edge): ${softProbability.toFixed(2)}\nhard MWST: ${hardState}`;
     tooltip.hidden = false;
 
     const rect = anchor.getBoundingClientRect();
@@ -467,6 +495,7 @@
     figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
     figure.querySelectorAll('[data-step="inputs"], [data-step="encoder"], [data-step="soft"], [data-step="samples"], [data-step="decoder"], [data-step="recon"]').forEach((element) => element.classList.add("is-visible"));
     slider.value = highTemperature.toFixed(2);
+    setTrainingState(0, 0, highTemperature);
     updateTemperature(highTemperature);
     updateEpochCounter(1);
     setRepresentation("scores");
@@ -489,6 +518,7 @@
     replayButton.disabled = true;
     slider.disabled = true;
     slider.value = highTemperature.toFixed(2);
+    setTrainingState(0, 0, highTemperature);
     updateTemperature(highTemperature);
     updateEpochCounter(1);
     setRepresentation("scores");
@@ -503,7 +533,7 @@
     if (!await revealStep("soft", "Entering the differentiable soft-tree training surrogate", animationDuration(220), token)) return;
 
     setRepresentation("soft");
-    status.textContent = "Training for 20 epochs as temperature falls";
+    status.textContent = "Learning input-specific dependence structures over 10 epochs";
     if (!await animateEpochs(highTemperature, lowTemperature, token)) return;
 
     figure.classList.add("feedback-pulse-active");
@@ -547,40 +577,74 @@
   }
 
   function updateEpochCounter(epoch) {
-    epochCounter.textContent = `Epoch ${epoch} / 20`;
+    epochCounter.textContent = `Epoch ${epoch} / ${totalEpochs}`;
   }
 
   function animateEpochs(start, end, token) {
     return new Promise((resolve) => {
-      const totalEpochs = 20;
-      const epochDuration = 500;
+      const epochDuration = 780;
       if (reducedMotion.matches) {
         slider.value = end.toFixed(2);
+        setTrainingState(totalEpochs - 1, 0, end);
         updateTemperature(end);
         updateEpochCounter(totalEpochs);
         resolve(token === replayToken);
         return;
       }
 
-      let epoch = 1;
-      const tick = () => {
+      let epochIndex = 0;
+      const animateTransition = () => {
         if (token !== replayToken) {
           resolve(false);
           return;
         }
-        const progress = (epoch - 1) / (totalEpochs - 1);
-        const temperature = start + (end - start) * progress;
-        slider.value = temperature.toFixed(2);
-        updateTemperature(temperature);
-        updateEpochCounter(epoch);
-        if (epoch < totalEpochs) {
-          epoch += 1;
-          window.setTimeout(tick, epochDuration);
-          return;
-        }
-        window.setTimeout(() => resolve(token === replayToken), epochDuration);
+        const transitionStart = performance.now();
+        const renderFrame = (now) => {
+          if (token !== replayToken) {
+            resolve(false);
+            return;
+          }
+          const progress = Math.min((now - transitionStart) / epochDuration, 1);
+          const easedProgress = 1 - (1 - progress) ** 3;
+          const overallProgress = (epochIndex + easedProgress) / (totalEpochs - 1);
+          const temperature = start + (end - start) * overallProgress;
+          slider.value = temperature.toFixed(2);
+          setTrainingState(epochIndex, easedProgress, temperature);
+          updateTemperature(temperature);
+
+          if (progress < 1) {
+            window.requestAnimationFrame(renderFrame);
+            return;
+          }
+
+          epochIndex += 1;
+          updateEpochCounter(epochIndex + 1);
+          if (epochIndex < totalEpochs - 1) {
+            window.requestAnimationFrame(animateTransition);
+            return;
+          }
+          resolve(token === replayToken);
+        };
+        window.requestAnimationFrame(renderFrame);
       };
-      window.setTimeout(tick, 0);
+      animateTransition();
     });
+  }
+
+  function setTrainingState(epochIndex, interpolation, temperature) {
+    samples.forEach((sample) => {
+      const fromScores = trainingStates[sample.id][epochIndex].scores;
+      const toScores = trainingStates[sample.id][Math.min(epochIndex + 1, totalEpochs - 1)].scores;
+      const scores = Object.fromEntries(edges.map((edge) => [
+        edge.id,
+        fromScores[edge.id] + (toScores[edge.id] - fromScores[edge.id]) * interpolation,
+      ]));
+      currentScores.set(sample.id, scores);
+      hardTrees.set(sample.id, maximumSpanningTree(scores));
+      softMarginals.set(sample.id, calculateSoftMarginals(scores, temperature));
+    });
+    if (viewsRendered && currentRepresentation) {
+      applyRepresentation();
+    }
   }
 })();
