@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Beyond Mean-Field: Tree-Copula Variational Autoencoders for Structured Latent Dependencies</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="method-visualization.css" />
   </head>
   <body>
     <main class="page">
@@ -45,7 +46,7 @@
 
           <div class="shared-encoder" data-step="encoder" aria-label="Shared encoder">
             <span class="stage-kicker">Encoder</span>
-            <div class="encoder-core" aria-hidden="true"><span>f</span><sub>&phi;</sub></div>
+            <div class="encoder-core" aria-hidden="true"><span>q<sub>&phi;</sub></span></div>
             <span class="shared-note">shared</span>
           </div>
 
@@ -102,10 +103,9 @@
                   <div class="matrix-target" id="dependency-matrix-a"></div>
                 </div>
               </div>
-              <div class="branch-fork" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
-                <span class="fork-origin">scores</span>
-                <span class="fork-route fork-route--hard"><b>Hard MWST</b><small>posterior structure</small></span>
-                <span class="fork-route fork-route--soft"><b>Soft &beta;(x,&tau;)</b><small>training surrogate</small></span>
+              <div class="representation-roles" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
+                <span class="representation-role representation-role--hard"><b>Hard MWST</b><small>posterior / sample</small></span>
+                <span class="representation-role representation-role--soft"><b>Soft &beta;(x,&tau;)</b><small>differentiable training</small></span>
               </div>
             </article>
 
@@ -127,10 +127,9 @@
                   <div class="matrix-target" id="dependency-matrix-b"></div>
                 </div>
               </div>
-              <div class="branch-fork" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
-                <span class="fork-origin">scores</span>
-                <span class="fork-route fork-route--hard"><b>Hard MWST</b><small>posterior structure</small></span>
-                <span class="fork-route fork-route--soft"><b>Soft &beta;(x,&tau;)</b><small>training surrogate</small></span>
+              <div class="representation-roles" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
+                <span class="representation-role representation-role--hard"><b>Hard MWST</b><small>posterior / sample</small></span>
+                <span class="representation-role representation-role--soft"><b>Soft &beta;(x,&tau;)</b><small>differentiable training</small></span>
               </div>
             </article>
           </section>
@@ -147,7 +146,7 @@
 
           <div class="shared-decoder" data-step="decoder" aria-label="Shared decoder">
             <span class="stage-kicker">Decoder</span>
-            <div class="decoder-core" aria-hidden="true"><span>p</span><sub>&theta;</sub></div>
+            <div class="decoder-core" aria-hidden="true"><span>p<sub>&theta;</sub></span></div>
             <span class="shared-note">shared</span>
           </div>
 

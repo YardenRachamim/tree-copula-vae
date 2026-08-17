@@ -19,6 +19,7 @@
 
   const edgeById = new Map(edges.map((edge) => [edge.id, edge]));
   const softProbabilityLabel = "Soft edge probabilities \u03b2(x, \u03c4)";
+  const hardMatrixLabel = "Training surrogate \u03b2(x, \u03c4)";
   const nodePositions = {
     1: [180, 34],
     2: [318, 116],
@@ -32,13 +33,11 @@
       id: "a",
       name: "Input A",
       demoScores: { 12: 0.94, 13: 0.88, 14: 0.84, 23: 0.31, 24: 0.22, 34: 0.27 },
-      values: { 1: "+0.7", 2: "-0.2", 3: "+1.1", 4: "+0.1" },
     },
     {
       id: "b",
       name: "Input B",
       demoScores: { 12: 0.88, 13: 0.3, 14: 0.17, 23: 0.92, 24: 0.35, 34: 0.86 },
-      values: { 1: "-0.5", 2: "+0.3", 3: "+0.9", 4: "-0.4" },
     },
   ];
 
@@ -227,8 +226,7 @@
       });
       nodeGroup.append(
         svgElement("circle", { class: "node-disc", cx: x, cy: y, r: 24 }),
-        svgText({ class: "node-symbol", x, y: y - 4, "text-anchor": "middle" }, `z${node}`),
-        svgText({ class: "node-value", x, y: y + 14, "text-anchor": "middle" }, sample.values[node]),
+        svgText({ class: "node-symbol", x, y: y + 6, "text-anchor": "middle" }, `z${node}`),
       );
       svg.append(nodeGroup);
     });
@@ -310,7 +308,7 @@
 
     samples.forEach((sample) => {
       updateGraph(sample, currentRepresentation);
-      updateMatrix(sample, currentRepresentation === "scores" ? "scores" : "soft");
+      updateMatrix(sample, currentRepresentation);
       const representationLabel = figure.querySelector(`#representation-label-${sample.id}`);
       representationLabel.textContent = currentRepresentation === "scores"
         ? "Pairwise scores"
@@ -356,9 +354,9 @@
   }
 
   function updateMatrix(sample, matrixMode) {
-    const useSoftProbabilities = matrixMode === "soft";
+    const useSoftProbabilities = matrixMode !== "scores";
     const values = useSoftProbabilities ? softMarginals.get(sample.id) : sample.demoScores;
-    const caption = useSoftProbabilities ? softProbabilityLabel : "Pairwise scores";
+    const caption = matrixMode === "hard" ? hardMatrixLabel : useSoftProbabilities ? softProbabilityLabel : "Pairwise scores";
     const target = figure.querySelector(`#dependency-matrix-${sample.id}`);
     const captionElement = figure.querySelector(`#matrix-caption-${sample.id}`);
     captionElement.textContent = caption;
@@ -531,10 +529,10 @@
     if (!await pause(420, token)) return;
 
     setSampling(true);
-    status.textContent = "Sampling correlated latent values on the hard trees";
+    status.textContent = "Sampling from the hard-tree posterior";
     if (!await pause(640, token)) return;
-    setSampling(false);
     if (!await revealStep("samples", "Passing samples through the posterior path", 250, token)) return;
+    setSampling(false);
     if (!await revealStep("decoder", "Decoding both latent samples", 250, token)) return;
     if (!await revealStep("recon", "Showing replaceable reconstruction endpoints", 220, token)) return;
 
