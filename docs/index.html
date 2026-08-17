@@ -29,7 +29,7 @@
           </div>
         </header>
 
-        <p class="figure-message">Hard tree for sampling. Soft trees for learning.</p>
+        <p class="figure-message">Hard tree defines the posterior. Soft marginals enable learning.</p>
 
         <div class="method-workbench" aria-label="Interactive tree-copula training visualization">
           <article class="input-stage input-stage-a" data-step="inputs" aria-label="Replaceable schematic input A">
@@ -56,10 +56,6 @@
 
           <section class="dependence-region" aria-label="Input-specific latent dependence learning">
             <div class="soft-learning-control" data-step="soft">
-              <div class="soft-learning-copy">
-                <span>Soft edge probabilities &beta;(x,&tau;)</span>
-                <small>training surrogate</small>
-              </div>
               <div class="temperature-control">
                 <label for="tree-temperature">Temperature &tau;</label>
                 <output class="epoch-counter" id="epoch-counter" aria-live="polite">Epoch 1 / 10</output>
@@ -80,21 +76,11 @@
                 <output id="temperature-value" for="tree-temperature">1.15</output>
                 <span class="sr-only" id="temperature-description">Controls the concentration of the illustrative soft distribution over spanning trees for both samples.</span>
               </div>
-
-              <div class="training-feedback" data-step="feedback" aria-label="Differentiable training signal returning from soft tree marginals to the encoder">
-                <svg viewBox="0 0 240 62" aria-hidden="true">
-                  <path class="feedback-path" d="M232 10C194 53 70 60 14 24"></path>
-                  <path class="feedback-arrowhead" d="M18 16 8 25l13 4"></path>
-                  <circle class="feedback-pulse" cx="218" cy="18" r="3.5"></circle>
-                </svg>
-                <span>differentiable training signal</span>
-              </div>
             </div>
 
             <article class="dependence-stage dependence-stage-a" data-step="nodes" aria-labelledby="dependence-a-title">
               <header class="dependence-heading">
                 <span id="dependence-a-title">Sample A</span>
-                <span class="representation-label" id="representation-label-a">Pairwise scores</span>
               </header>
               <div class="evolving-views">
                 <div class="evolving-graph-wrap">
@@ -105,20 +91,15 @@
                   </div>
                 </div>
                 <div class="matrix-wrap">
-                  <span class="matrix-caption" id="matrix-caption-a">Pairwise scores</span>
+                  <span class="matrix-caption" id="matrix-caption-a">Soft &beta;(x,&tau;)<small>edge inclusion probabilities</small></span>
                   <div class="matrix-target" id="dependency-matrix-a"></div>
                 </div>
-              </div>
-              <div class="representation-roles" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
-                <span class="representation-role representation-role--hard"><b>Hard MWST</b><small>posterior / sample</small></span>
-                <span class="representation-role representation-role--soft"><b>Soft &beta;(x,&tau;)</b><small>differentiable training</small></span>
               </div>
             </article>
 
             <article class="dependence-stage dependence-stage-b" data-step="nodes" aria-labelledby="dependence-b-title">
               <header class="dependence-heading">
                 <span id="dependence-b-title">Sample B</span>
-                <span class="representation-label" id="representation-label-b">Pairwise scores</span>
               </header>
               <div class="evolving-views">
                 <div class="evolving-graph-wrap">
@@ -129,15 +110,24 @@
                   </div>
                 </div>
                 <div class="matrix-wrap">
-                  <span class="matrix-caption" id="matrix-caption-b">Pairwise scores</span>
+                  <span class="matrix-caption" id="matrix-caption-b">Soft &beta;(x,&tau;)<small>edge inclusion probabilities</small></span>
                   <div class="matrix-target" id="dependency-matrix-b"></div>
                 </div>
               </div>
-              <div class="representation-roles" data-step="fork" aria-label="Hard and soft uses of the same pairwise scores">
-                <span class="representation-role representation-role--hard"><b>Hard MWST</b><small>posterior / sample</small></span>
-                <span class="representation-role representation-role--soft"><b>Soft &beta;(x,&tau;)</b><small>differentiable training</small></span>
-              </div>
             </article>
+
+            <svg class="soft-objective-connections" data-step="soft" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path class="soft-objective-path" d="M82 22C82 48 65 68 51 88"></path>
+              <path class="soft-objective-path" d="M82 62C73 73 62 81 51 88"></path>
+              <path class="soft-objective-arrowhead" d="M48 83 51 89l-6-1"></path>
+              <path class="gradient-path" d="M46 91C26 90 12 75 5 50"></path>
+              <path class="gradient-arrowhead" d="M2 53 5 47l4 5"></path>
+              <text class="gradient-label" x="17" y="77">gradient</text>
+            </svg>
+            <aside class="training-objective" data-step="soft" aria-label="Shared differentiable training objective">
+              <b>Differentiable training objective</b>
+              <small>soft-tree surrogate</small>
+            </aside>
           </section>
 
           <article class="sample-stage sample-stage-a" data-step="samples" aria-label="Sample from input A hard-tree posterior">

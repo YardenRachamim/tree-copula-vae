@@ -336,71 +336,43 @@
   }
 
   function applyRepresentation() {
-    figure.dataset.representation = currentRepresentation;
-    figure.classList.toggle("is-soft-state", currentRepresentation === "soft");
-    figure.classList.toggle("is-hard-state", currentRepresentation === "hard");
-
     samples.forEach((sample) => {
-      updateGraph(sample, currentRepresentation);
-      updateMatrix(sample, currentRepresentation);
-      const representationLabel = figure.querySelector(`#representation-label-${sample.id}`);
-      representationLabel.textContent = currentRepresentation === "scores"
-        ? "Pairwise scores"
-        : currentRepresentation === "soft"
-          ? softProbabilityLabel
-          : "Hard MWST";
+      updateGraph(sample);
+      updateMatrix(sample);
     });
   }
 
-  function updateGraph(sample, representation) {
+  function updateGraph(sample) {
     const hardTree = hardTrees.get(sample.id);
-    const marginals = softMarginals.get(sample.id);
     figure.querySelectorAll(`#dependency-graph-${sample.id} .graph-edge`).forEach((group) => {
       const edgeId = group.dataset.edge;
       const line = group.querySelector(".edge-line");
       const isHardEdge = hardTree.has(edgeId);
       group.classList.toggle("is-hard-selected", isHardEdge);
-      let strength;
-
-      if (representation === "scores") {
-        strength = currentScores.get(sample.id)[edgeId];
-        line.style.stroke = "#216d9c";
-        line.style.strokeWidth = `${1.2 + strength * 7}px`;
-        line.style.opacity = `${0.16 + strength * 0.84}`;
-      } else if (representation === "soft") {
-        strength = marginals[edgeId];
-        line.style.stroke = "#1b7994";
-        line.style.strokeWidth = `${1 + strength * 8}px`;
-        line.style.opacity = `${0.1 + strength * 0.9}`;
-      } else if (isHardEdge) {
+      if (isHardEdge) {
         line.style.stroke = "#0d7d77";
         line.style.strokeWidth = "7px";
         line.style.opacity = "1";
       } else {
-        line.style.stroke = "#94a6b5";
+        line.style.stroke = "transparent";
         line.style.strokeWidth = "1px";
-        line.style.opacity = "0.025";
+        line.style.opacity = "0";
       }
 
       line.style.strokeDasharray = "none";
-      group.classList.toggle("is-hard-hidden", representation === "hard" && !isHardEdge);
       group.setAttribute("aria-label", edgeAriaLabel(sample, edgeId));
     });
   }
 
-  function updateMatrix(sample, matrixMode) {
-    const useSoftProbabilities = matrixMode !== "scores";
-    const values = useSoftProbabilities ? softMarginals.get(sample.id) : currentScores.get(sample.id);
-    const caption = matrixMode === "hard" ? hardMatrixLabel : useSoftProbabilities ? softProbabilityLabel : "Pairwise scores";
+  function updateMatrix(sample) {
+    const values = softMarginals.get(sample.id);
     const target = figure.querySelector(`#dependency-matrix-${sample.id}`);
-    const captionElement = figure.querySelector(`#matrix-caption-${sample.id}`);
-    captionElement.textContent = caption;
     target.querySelectorAll(".matrix-cell").forEach((cell) => {
       const value = values[cell.dataset.edge];
       cell.style.setProperty("--strength", value.toFixed(4));
-      cell.setAttribute("aria-label", `${edgeAriaLabel(sample, cell.dataset.edge)}. ${caption}.`);
+      cell.setAttribute("aria-label", `${edgeAriaLabel(sample, cell.dataset.edge)}. ${softProbabilityLabel}.`);
     });
-    target.querySelector(".score-matrix").setAttribute("aria-label", `${sample.name} ${caption.toLowerCase()} matrix`);
+    target.querySelector(".score-matrix").setAttribute("aria-label", `${sample.name} soft edge-marginal matrix`);
   }
 
   function edgeAriaLabel(sample, edgeId) {
@@ -521,7 +493,7 @@
     const animationDuration = (duration) => reducedMotion.matches ? 0 : duration * 1.65;
     figure.classList.add("is-replaying");
     figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
-    figure.querySelectorAll('[data-step="nodes"], [data-step="fork"], [data-step="feedback"]').forEach((element) => element.classList.remove("is-visible"));
+    figure.querySelectorAll('[data-step="nodes"], [data-step="soft"]').forEach((element) => element.classList.remove("is-visible"));
     pinnedEdge = null;
     clearHighlight();
     setSampling(false);
@@ -539,8 +511,7 @@
     figure.classList.add("is-scores-revealed");
     status.textContent = "Revealing pairwise scores and their matching heatmaps";
     if (!await pause(animationDuration(540), token)) return;
-    if (!await revealStep("fork", "Splitting the same pairwise scores into hard and soft uses", animationDuration(300), token)) return;
-    if (!await revealStep("soft", "Entering the differentiable soft-tree training surrogate", animationDuration(220), token)) return;
+    if (!await revealStep("soft", "Showing hard posterior trees and soft training marginals", animationDuration(300), token)) return;
 
     setRepresentation("soft");
     status.textContent = "Learning input-specific dependence structures over 10 epochs";
@@ -550,13 +521,8 @@
     }
     figure.classList.remove("is-training");
 
-    figure.classList.add("feedback-pulse-active");
-    if (!await revealStep("feedback", "Sending the differentiable training signal back to the encoder", animationDuration(380), token)) return;
-    figure.classList.remove("feedback-pulse-active");
-
-    setRepresentation("hard");
     figure.classList.add("is-hard-revealed");
-    status.textContent = "Selecting the hard maximum-weight spanning trees";
+    status.textContent = "Emphasizing the final hard maximum-weight spanning trees";
     if (!await pause(animationDuration(420), token)) return;
 
     setSampling(true);
