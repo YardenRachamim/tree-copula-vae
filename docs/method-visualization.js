@@ -56,7 +56,6 @@
   let highlightedEdge = null;
   let pinnedEdge = null;
   let replayToken = 0;
-  let hasAutoplayed = false;
 
   samples.forEach((sample) => {
     renderGraph(`dependency-graph-${sample.id}`, sample);
@@ -74,12 +73,7 @@
     status.textContent = `Soft tree probabilities updated for temperature ${Number(slider.value).toFixed(2)}`;
   });
   replayButton.addEventListener("click", replay);
-
-  if (reducedMotion.matches) {
-    showReducedMotionState();
-  } else {
-    observeForAutoplay();
-  }
+  showReadyState();
 
   function enumerateSpanningTrees() {
     const trees = [];
@@ -466,31 +460,19 @@
     setRepresentation("soft");
   }
 
-  function showReducedMotionState() {
-    const lowTemperature = Number(slider.min) + 0.04;
-    slider.value = lowTemperature.toFixed(2);
-    updateTemperature(lowTemperature);
-    setRepresentation("hard");
-    figure.classList.add("is-scores-revealed", "is-hard-revealed", "is-complete");
-    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.add("is-visible"));
-    status.textContent = "Interactive method visualization ready";
-  }
-
-  function observeForAutoplay() {
-    if (!("IntersectionObserver" in window)) {
-      return;
-    }
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!hasAutoplayed && entry.isIntersecting && entry.intersectionRatio >= 0.45) {
-          hasAutoplayed = true;
-          observer.disconnect();
-          replay();
-          break;
-        }
-      }
-    }, { threshold: [0.45] });
-    observer.observe(figure);
+  function showReadyState() {
+    const highTemperature = Number(slider.max);
+    figure.classList.add("is-replaying");
+    figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
+    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
+    figure.querySelectorAll('[data-step="inputs"], [data-step="encoder"], [data-step="soft"]').forEach((element) => element.classList.add("is-visible"));
+    slider.value = highTemperature.toFixed(2);
+    updateTemperature(highTemperature);
+    updateEpochCounter(1);
+    setRepresentation("scores");
+    slider.disabled = true;
+    replayButton.textContent = "Play animation";
+    status.textContent = "Ready to animate input-specific dependence learning";
   }
 
   async function replay() {
@@ -500,17 +482,18 @@
     const animationDuration = (duration) => reducedMotion.matches ? 0 : duration * 1.65;
     figure.classList.add("is-replaying");
     figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
-    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
+    figure.querySelectorAll('[data-step="nodes"], [data-step="fork"], [data-step="feedback"], [data-step="samples"], [data-step="decoder"], [data-step="recon"]').forEach((element) => element.classList.remove("is-visible"));
     pinnedEdge = null;
     clearHighlight();
     setSampling(false);
+    replayButton.disabled = true;
+    slider.disabled = true;
     slider.value = highTemperature.toFixed(2);
     updateTemperature(highTemperature);
     updateEpochCounter(1);
     setRepresentation("scores");
 
-    if (!await revealStep("inputs", "Showing two inputs", animationDuration(300), token)) return;
-    if (!await revealStep("encoder", "Activating the shared encoder", animationDuration(340), token)) return;
+    if (!await pause(animationDuration(320), token)) return;
     if (!await revealStep("nodes", "Revealing latent variables for both inputs", animationDuration(280), token)) return;
 
     figure.classList.add("is-scores-revealed");
@@ -542,6 +525,9 @@
 
     figure.classList.remove("is-replaying");
     figure.classList.add("is-complete");
+    replayButton.disabled = false;
+    slider.disabled = false;
+    replayButton.textContent = "Replay";
     status.textContent = "Interactive method visualization ready";
   }
 
