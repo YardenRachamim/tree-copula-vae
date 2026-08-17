@@ -93,6 +93,11 @@
                 <div class="matrix-wrap">
                   <span class="matrix-caption" id="matrix-caption-a">Soft &beta;(x,&tau;)<small>edge inclusion probabilities</small></span>
                   <div class="matrix-target" id="dependency-matrix-a"></div>
+                  <div class="training-surrogate" data-step="soft">
+                    <span class="surrogate-arrow" aria-hidden="true"></span>
+                    <b>Training surrogate</b>
+                    <small>&larr; gradient</small>
+                  </div>
                 </div>
               </div>
             </article>
@@ -112,22 +117,15 @@
                 <div class="matrix-wrap">
                   <span class="matrix-caption" id="matrix-caption-b">Soft &beta;(x,&tau;)<small>edge inclusion probabilities</small></span>
                   <div class="matrix-target" id="dependency-matrix-b"></div>
+                  <div class="training-surrogate" data-step="soft">
+                    <span class="surrogate-arrow" aria-hidden="true"></span>
+                    <b>Training surrogate</b>
+                    <small>&larr; gradient</small>
+                  </div>
                 </div>
               </div>
             </article>
 
-            <svg class="soft-objective-connections" data-step="soft" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path class="soft-objective-path" d="M82 22C82 48 65 68 51 88"></path>
-              <path class="soft-objective-path" d="M82 62C73 73 62 81 51 88"></path>
-              <path class="soft-objective-arrowhead" d="M48 83 51 89l-6-1"></path>
-              <path class="gradient-path" d="M46 91C26 90 12 75 5 50"></path>
-              <path class="gradient-arrowhead" d="M2 53 5 47l4 5"></path>
-              <text class="gradient-label" x="17" y="77">gradient</text>
-            </svg>
-            <aside class="training-objective" data-step="soft" aria-label="Shared differentiable training objective">
-              <b>Differentiable training objective</b>
-              <small>soft-tree surrogate</small>
-            </aside>
           </section>
 
           <article class="sample-stage sample-stage-a" data-step="samples" aria-label="Sample from input A hard-tree posterior">
