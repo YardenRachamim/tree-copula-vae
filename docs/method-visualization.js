@@ -465,7 +465,7 @@
     figure.classList.add("is-replaying");
     figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
     figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
-    figure.querySelectorAll('[data-step="inputs"], [data-step="encoder"], [data-step="soft"]').forEach((element) => element.classList.add("is-visible"));
+    figure.querySelectorAll('[data-step="inputs"], [data-step="encoder"], [data-step="soft"], [data-step="samples"], [data-step="decoder"], [data-step="recon"]').forEach((element) => element.classList.add("is-visible"));
     slider.value = highTemperature.toFixed(2);
     updateTemperature(highTemperature);
     updateEpochCounter(1);
@@ -482,7 +482,7 @@
     const animationDuration = (duration) => reducedMotion.matches ? 0 : duration * 1.65;
     figure.classList.add("is-replaying");
     figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
-    figure.querySelectorAll('[data-step="nodes"], [data-step="fork"], [data-step="feedback"], [data-step="samples"], [data-step="decoder"], [data-step="recon"]').forEach((element) => element.classList.remove("is-visible"));
+    figure.querySelectorAll('[data-step="nodes"], [data-step="fork"], [data-step="feedback"]').forEach((element) => element.classList.remove("is-visible"));
     pinnedEdge = null;
     clearHighlight();
     setSampling(false);
@@ -518,10 +518,7 @@
     setSampling(true);
     status.textContent = "Sampling from the hard-tree posterior";
     if (!await pause(animationDuration(640), token)) return;
-    if (!await revealStep("samples", "Passing samples through the posterior path", animationDuration(250), token)) return;
     setSampling(false);
-    if (!await revealStep("decoder", "Decoding both latent samples", animationDuration(250), token)) return;
-    if (!await revealStep("recon", "Showing replaceable reconstruction endpoints", animationDuration(220), token)) return;
 
     figure.classList.remove("is-replaying");
     figure.classList.add("is-complete");
