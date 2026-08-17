@@ -28,26 +28,27 @@
   };
 
   const totalEpochs = 10;
+  const trainingTemperatures = [1.10, 1.00, 0.90, 0.80, 0.68, 0.56, 0.44, 0.33, 0.23, 0.14];
   const trainingStates = {
     a: [
-      { scores: { 12: 0.54, 13: 0.52, 14: 0.49, 23: 0.56, 24: 0.46, 34: 0.51 } },
-      { scores: { 12: 0.62, 13: 0.57, 14: 0.52, 23: 0.59, 24: 0.45, 34: 0.50 } },
-      { scores: { 12: 0.70, 13: 0.66, 14: 0.54, 23: 0.68, 24: 0.43, 34: 0.49 } },
-      { scores: { 12: 0.74, 13: 0.69, 14: 0.61, 23: 0.72, 24: 0.41, 34: 0.47 } },
-      { scores: { 12: 0.73, 13: 0.72, 14: 0.65, 23: 0.76, 24: 0.40, 34: 0.45 } },
-      { scores: { 12: 0.78, 13: 0.77, 14: 0.72, 23: 0.69, 24: 0.38, 34: 0.43 } },
+      { scores: { 12: 0.55, 13: 0.52, 14: 0.47, 23: 0.57, 24: 0.45, 34: 0.50 } },
+      { scores: { 12: 0.63, 13: 0.56, 14: 0.50, 23: 0.61, 24: 0.43, 34: 0.48 } },
+      { scores: { 12: 0.74, 13: 0.68, 14: 0.55, 23: 0.72, 24: 0.39, 34: 0.45 } },
+      { scores: { 12: 0.78, 13: 0.71, 14: 0.60, 23: 0.76, 24: 0.36, 34: 0.42 } },
+      { scores: { 12: 0.76, 13: 0.75, 14: 0.67, 23: 0.80, 24: 0.34, 34: 0.40 } },
+      { scores: { 12: 0.82, 13: 0.80, 14: 0.75, 23: 0.68, 24: 0.31, 34: 0.36 } },
       { scores: { 12: 0.84, 13: 0.82, 14: 0.78, 23: 0.58, 24: 0.33, 34: 0.39 } },
       { scores: { 12: 0.88, 13: 0.85, 14: 0.81, 23: 0.48, 24: 0.29, 34: 0.34 } },
       { scores: { 12: 0.92, 13: 0.89, 14: 0.85, 23: 0.39, 24: 0.25, 34: 0.30 } },
       { scores: { 12: 0.94, 13: 0.91, 14: 0.88, 23: 0.31, 24: 0.22, 34: 0.27 } },
     ],
     b: [
-      { scores: { 12: 0.53, 13: 0.51, 14: 0.48, 23: 0.55, 24: 0.50, 34: 0.52 } },
-      { scores: { 12: 0.60, 13: 0.57, 14: 0.49, 23: 0.58, 24: 0.55, 34: 0.56 } },
-      { scores: { 12: 0.66, 13: 0.61, 14: 0.52, 23: 0.64, 24: 0.62, 34: 0.60 } },
-      { scores: { 12: 0.69, 13: 0.63, 14: 0.71, 23: 0.67, 24: 0.59, 34: 0.65 } },
-      { scores: { 12: 0.74, 13: 0.56, 14: 0.62, 23: 0.75, 24: 0.52, 34: 0.72 } },
-      { scores: { 12: 0.79, 13: 0.48, 14: 0.46, 23: 0.81, 24: 0.45, 34: 0.78 } },
+      { scores: { 12: 0.54, 13: 0.50, 14: 0.47, 23: 0.56, 24: 0.51, 34: 0.53 } },
+      { scores: { 12: 0.61, 13: 0.55, 14: 0.48, 23: 0.60, 24: 0.57, 34: 0.62 } },
+      { scores: { 12: 0.70, 13: 0.58, 14: 0.51, 23: 0.67, 24: 0.69, 34: 0.57 } },
+      { scores: { 12: 0.73, 13: 0.56, 14: 0.68, 23: 0.70, 24: 0.74, 34: 0.62 } },
+      { scores: { 12: 0.76, 13: 0.50, 14: 0.61, 23: 0.79, 24: 0.53, 34: 0.75 } },
+      { scores: { 12: 0.81, 13: 0.43, 14: 0.42, 23: 0.84, 24: 0.42, 34: 0.81 } },
       { scores: { 12: 0.83, 13: 0.40, 14: 0.34, 23: 0.86, 24: 0.40, 34: 0.82 } },
       { scores: { 12: 0.86, 13: 0.35, 14: 0.26, 23: 0.89, 24: 0.37, 34: 0.85 } },
       { scores: { 12: 0.88, 13: 0.32, 14: 0.20, 23: 0.91, 24: 0.35, 34: 0.87 } },
@@ -69,6 +70,7 @@
   const slider = figure.querySelector("#tree-temperature");
   const temperatureValue = figure.querySelector("#temperature-value");
   const epochCounter = figure.querySelector("#epoch-counter");
+  const epochProgress = figure.querySelector("#epoch-progress");
   const replayButton = figure.querySelector("#method-replay");
   const tooltip = figure.querySelector("#edge-tooltip");
   const status = figure.querySelector("#method-status");
@@ -84,6 +86,7 @@
   let replayToken = 0;
   let viewsRendered = false;
 
+  initializeEpochProgress();
   setTrainingState(0, 0, Number(slider.value));
   samples.forEach((sample) => {
     renderGraph(`dependency-graph-${sample.id}`, sample);
@@ -236,7 +239,14 @@
         x2: endX,
         y2: endY,
       });
-      group.append(hitLine, visualLine);
+      const hardAccent = svgElement("line", {
+        class: "edge-hard-accent",
+        x1: startX,
+        y1: startY,
+        x2: endX,
+        y2: endY,
+      });
+      group.append(hitLine, hardAccent, visualLine);
       attachEdgeInteractions(group, sample.id, edge.id);
       svg.append(group);
     });
@@ -349,6 +359,7 @@
       const edgeId = group.dataset.edge;
       const line = group.querySelector(".edge-line");
       const isHardEdge = hardTree.has(edgeId);
+      group.classList.toggle("is-hard-selected", isHardEdge);
       let strength;
 
       if (representation === "scores") {
@@ -481,7 +492,7 @@
   }
 
   function showManualSoftState() {
-    figure.classList.remove("is-replaying", "is-complete", "is-hard-revealed", "feedback-pulse-active");
+    figure.classList.remove("is-replaying", "is-complete", "is-hard-revealed", "feedback-pulse-active", "is-training");
     figure.classList.add("is-scores-revealed");
     figure.querySelectorAll("[data-step]").forEach((element) => element.classList.add("is-visible"));
     setSampling(false);
@@ -489,9 +500,9 @@
   }
 
   function showReadyState() {
-    const highTemperature = Number(slider.max);
+    const highTemperature = trainingTemperatures[0];
     figure.classList.add("is-replaying");
-    figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
+    figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active", "is-training");
     figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
     figure.querySelectorAll('[data-step="inputs"], [data-step="encoder"], [data-step="soft"], [data-step="samples"], [data-step="decoder"], [data-step="recon"]').forEach((element) => element.classList.add("is-visible"));
     slider.value = highTemperature.toFixed(2);
@@ -506,8 +517,7 @@
 
   async function replay() {
     const token = ++replayToken;
-    const highTemperature = Number(slider.max);
-    const lowTemperature = Number(slider.min) + 0.04;
+    const highTemperature = trainingTemperatures[0];
     const animationDuration = (duration) => reducedMotion.matches ? 0 : duration * 1.65;
     figure.classList.add("is-replaying");
     figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
@@ -534,7 +544,11 @@
 
     setRepresentation("soft");
     status.textContent = "Learning input-specific dependence structures over 10 epochs";
-    if (!await animateEpochs(highTemperature, lowTemperature, token)) return;
+    if (!await animateEpochs(token)) {
+      figure.classList.remove("is-training");
+      return;
+    }
+    figure.classList.remove("is-training");
 
     figure.classList.add("feedback-pulse-active");
     if (!await revealStep("feedback", "Sending the differentiable training signal back to the encoder", animationDuration(380), token)) return;
@@ -578,15 +592,24 @@
 
   function updateEpochCounter(epoch) {
     epochCounter.textContent = `Epoch ${epoch} / ${totalEpochs}`;
+    epochProgress.querySelectorAll(".epoch-progress-dot").forEach((dot, index) => {
+      dot.classList.toggle("is-complete", index < epoch - 1);
+      dot.classList.toggle("is-active", index === epoch - 1);
+    });
+    const activeDot = epochProgress.querySelector(".epoch-progress-dot.is-active");
+    if (activeDot) {
+      activeDot.classList.remove("is-entering");
+      void activeDot.offsetWidth;
+      activeDot.classList.add("is-entering");
+    }
   }
 
-  function animateEpochs(start, end, token) {
+  function animateEpochs(token) {
     return new Promise((resolve) => {
-      const epochDuration = 780;
       if (reducedMotion.matches) {
-        slider.value = end.toFixed(2);
-        setTrainingState(totalEpochs - 1, 0, end);
-        updateTemperature(end);
+        slider.value = trainingTemperatures[totalEpochs - 1].toFixed(2);
+        setTrainingState(totalEpochs - 1, 0, trainingTemperatures[totalEpochs - 1]);
+        updateTemperature(trainingTemperatures[totalEpochs - 1]);
         updateEpochCounter(totalEpochs);
         resolve(token === replayToken);
         return;
@@ -598,6 +621,11 @@
           resolve(false);
           return;
         }
+        const topologyChanges = samples.some((sample) => !sameTree(
+          maximumSpanningTree(trainingStates[sample.id][epochIndex].scores),
+          maximumSpanningTree(trainingStates[sample.id][epochIndex + 1].scores),
+        ));
+        const epochDuration = topologyChanges ? 960 : 780;
         const transitionStart = performance.now();
         const renderFrame = (now) => {
           if (token !== replayToken) {
@@ -606,8 +634,11 @@
           }
           const progress = Math.min((now - transitionStart) / epochDuration, 1);
           const easedProgress = 1 - (1 - progress) ** 3;
-          const overallProgress = (epochIndex + easedProgress) / (totalEpochs - 1);
-          const temperature = start + (end - start) * overallProgress;
+          const temperature = interpolateValue(
+            trainingTemperatures[epochIndex],
+            trainingTemperatures[epochIndex + 1],
+            easedProgress,
+          );
           slider.value = temperature.toFixed(2);
           setTrainingState(epochIndex, easedProgress, temperature);
           updateTemperature(temperature);
@@ -627,6 +658,7 @@
         };
         window.requestAnimationFrame(renderFrame);
       };
+      figure.classList.add("is-training");
       animateTransition();
     });
   }
@@ -640,11 +672,37 @@
         fromScores[edge.id] + (toScores[edge.id] - fromScores[edge.id]) * interpolation,
       ]));
       currentScores.set(sample.id, scores);
-      hardTrees.set(sample.id, maximumSpanningTree(scores));
+      const hardTree = maximumSpanningTree(scores);
+      hardTrees.set(sample.id, hardTree);
       softMarginals.set(sample.id, calculateSoftMarginals(scores, temperature));
+      if (viewsRendered) {
+        updateHardTreeMembership(sample, hardTree);
+      }
     });
     if (viewsRendered && currentRepresentation) {
       applyRepresentation();
     }
+  }
+
+  function initializeEpochProgress() {
+    for (let index = 0; index < totalEpochs; index += 1) {
+      const dot = document.createElement("span");
+      dot.className = "epoch-progress-dot";
+      epochProgress.append(dot);
+    }
+  }
+
+  function updateHardTreeMembership(sample, hardTree) {
+    figure.querySelectorAll(`#dependency-graph-${sample.id} .graph-edge`).forEach((group) => {
+      group.classList.toggle("is-hard-selected", hardTree.has(group.dataset.edge));
+    });
+  }
+
+  function interpolateValue(start, end, progress) {
+    return start + (end - start) * progress;
+  }
+
+  function sameTree(firstTree, secondTree) {
+    return firstTree.size === secondTree.size && [...firstTree].every((edgeId) => secondTree.has(edgeId));
   }
 })();

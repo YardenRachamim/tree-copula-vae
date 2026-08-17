@@ -315,6 +315,26 @@
   white-space: nowrap;
 }
 
+.epoch-progress {
+  display: flex;
+  grid-column: 2;
+  grid-row: 3;
+  justify-content: flex-end;
+  gap: 3px;
+  min-height: 4px;
+}
+
+.epoch-progress-dot {
+  width: 4px;
+  height: 4px;
+  background: #c7d5df;
+  border-radius: 50%;
+}
+
+.epoch-progress-dot.is-complete { background: #77aaa5; }
+.epoch-progress-dot.is-active { background: var(--figure-coral); }
+.epoch-progress-dot.is-entering { animation: epoch-marker-enter 420ms ease-out; }
+
 .temperature-range {
   display: grid;
   grid-template-columns: auto minmax(110px, 1fr) auto;
@@ -472,6 +492,29 @@
   stroke-linecap: round;
   transition: stroke 260ms ease, stroke-width 260ms ease, opacity 260ms ease, filter 160ms ease;
   vector-effect: non-scaling-stroke;
+}
+
+.edge-hard-accent {
+  stroke: var(--figure-coral);
+  stroke-linecap: round;
+  stroke-width: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 310ms ease, filter 310ms ease;
+  vector-effect: non-scaling-stroke;
+}
+
+.graph-edge.is-hard-selected .edge-hard-accent {
+  opacity: 0.7;
+  filter: drop-shadow(0 0 2px rgba(199, 93, 61, 0.58));
+}
+
+.method-figure.is-training .edge-line {
+  transition: filter 160ms ease;
+}
+
+.method-figure.is-training .matrix-cell {
+  transition: border-color 160ms ease, outline-color 160ms ease, transform 160ms ease;
 }
 
 .edge-hit {
@@ -827,6 +870,12 @@
   0% { color: var(--figure-coral); text-shadow: 0 0 0 transparent; transform: scale(0.88); }
   60% { color: var(--figure-teal); text-shadow: 0 0 9px rgba(13, 125, 119, 0.42); transform: scale(1.12); }
   100% { color: var(--figure-teal); text-shadow: none; transform: scale(1); }
+}
+
+@keyframes epoch-marker-enter {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.9); }
+  100% { transform: scale(1); }
 }
 
 @media (max-width: 1060px) {
