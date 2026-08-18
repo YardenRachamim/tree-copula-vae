@@ -28,6 +28,10 @@
   };
 
   const totalEpochs = 10;
+  const replayDuration = 5000;
+  const hardRevealDuration = 420;
+  const samplingDuration = 640;
+  const trainingDuration = replayDuration - hardRevealDuration - samplingDuration;
   const trainingTemperatures = [1.10, 1.00, 0.90, 0.80, 0.68, 0.56, 0.44, 0.33, 0.23, 0.14];
   const trainingStates = {
     a: [
@@ -490,7 +494,6 @@
   async function replay() {
     const token = ++replayToken;
     const highTemperature = trainingTemperatures[0];
-    const animationDuration = (duration) => reducedMotion.matches ? 0 : duration * 1.65;
     figure.classList.add("is-replaying");
     figure.classList.remove("is-complete", "is-hard-revealed", "feedback-pulse-active");
     figure.classList.add("is-scores-revealed");
@@ -508,7 +511,7 @@
 
     setRepresentation("soft");
     status.textContent = "Learning input-specific dependence structures over 10 epochs";
-    if (!await animateEpochs(token)) {
+    if (!await animateEpochs(token, trainingDuration)) {
       figure.classList.remove("is-training");
       return;
     }
@@ -516,11 +519,11 @@
 
     figure.classList.add("is-hard-revealed");
     status.textContent = "Emphasizing the final hard maximum-weight spanning trees";
-    if (!await pause(animationDuration(420), token)) return;
+    if (!await pause(hardRevealDuration, token)) return;
 
     setSampling(true);
     status.textContent = "Sampling from the hard-tree posterior";
-    if (!await pause(animationDuration(640), token)) return;
+    if (!await pause(samplingDuration, token)) return;
     setSampling(false);
 
     figure.classList.remove("is-replaying");
@@ -563,7 +566,7 @@
     }
   }
 
-  function animateEpochs(token) {
+  function animateEpochs(token, duration) {
     return new Promise((resolve) => {
       if (reducedMotion.matches) {
         slider.value = trainingTemperatures[totalEpochs - 1].toFixed(2);
@@ -575,23 +578,24 @@
       }
 
       let epochIndex = 0;
+      const epochDuration = duration / (totalEpochs - 1);
+      const trainingStart = performance.now();
       const animateTransition = () => {
         if (token !== replayToken) {
           resolve(false);
           return;
         }
-        const topologyChanges = samples.some((sample) => !sameTree(
-          maximumSpanningTree(trainingStates[sample.id][epochIndex].scores),
-          maximumSpanningTree(trainingStates[sample.id][epochIndex + 1].scores),
-        ));
-        const epochDuration = topologyChanges ? 960 : 780;
         const transitionStart = performance.now();
+        const transitionDuration = Math.max(
+          0,
+          trainingStart + epochDuration * (epochIndex + 1) - transitionStart,
+        );
         const renderFrame = (now) => {
           if (token !== replayToken) {
             resolve(false);
             return;
           }
-          const progress = Math.min((now - transitionStart) / epochDuration, 1);
+          const progress = Math.min((now - transitionStart) / transitionDuration, 1);
           const easedProgress = 1 - (1 - progress) ** 3;
           const temperature = interpolateValue(
             trainingTemperatures[epochIndex],
@@ -610,7 +614,7 @@
           epochIndex += 1;
           updateEpochCounter(epochIndex + 1);
           if (epochIndex < totalEpochs - 1) {
-            window.requestAnimationFrame(animateTransition);
+            animateTransition();
             return;
           }
           resolve(token === replayToken);

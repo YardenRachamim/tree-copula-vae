@@ -222,7 +222,7 @@
   position: absolute;
   top: 50%;
   width: 0.56rem;
-  border-top: 1px solid #a1b6c5;
+  border-top: 1.5px solid #7894a7;
   content: "";
 }
 
@@ -254,11 +254,11 @@
 .decoder-stage::after,
 .reconstruction-stage::after {
   position: absolute;
-  top: calc(50% - 3px);
-  width: 6px;
-  height: 6px;
+  top: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
   content: "";
-  background: #a1b6c5;
+  background: #7894a7;
   clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
@@ -391,15 +391,20 @@
 }
 
 .evolving-graph-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   position: relative;
   min-width: 0;
   min-height: 0;
 }
 
 .graph-target {
+  flex: 1 1 auto;
   width: 100%;
   height: 100%;
   min-width: 0;
+  min-height: 0;
 }
 
 .latent-graph {
@@ -494,13 +499,14 @@
 .hard-state-label {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 0.08rem;
-  position: absolute;
-  top: 0.35rem;
-  right: 0.2rem;
+  align-items: center;
+  gap: 0.1rem;
+  flex: 0 0 auto;
+  margin-bottom: 0.2rem;
   color: var(--figure-teal);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  text-align: center;
   opacity: 0;
   transform: translateY(-4px);
   transition: opacity 220ms ease, transform 220ms ease;
@@ -508,7 +514,7 @@
 
 .hard-state-label small {
   color: var(--figure-muted);
-  font-size: 0.57rem;
+  font-size: 0.58rem;
   font-weight: 600;
 }
 
@@ -539,37 +545,37 @@
 .training-surrogate {
   display: grid;
   justify-items: center;
-  gap: 0.08rem;
+  gap: 0.12rem;
   width: 100%;
-  padding-top: 0.08rem;
-  color: var(--figure-teal);
-  font-size: 0.56rem;
+  padding-top: 0.14rem;
+  color: #286d71;
+  font-size: 0.6rem;
   text-align: center;
 }
 
 .surrogate-arrow {
-  width: 1px;
-  height: 0.55rem;
+  width: 2px;
+  height: 0.65rem;
   position: relative;
-  background: #7aada8;
+  background: var(--figure-teal);
 }
 
 .surrogate-arrow::after {
   position: absolute;
   bottom: -1px;
-  left: -2px;
-  width: 5px;
-  height: 5px;
+  left: -3px;
+  width: 8px;
+  height: 7px;
   content: "";
-  background: #7aada8;
+  background: var(--figure-teal);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
 
-.training-surrogate b { font-size: 0.58rem; }
+.training-surrogate b { font-size: 0.66rem; }
 
 .training-surrogate small {
-  color: var(--figure-muted);
-  font-size: 0.51rem;
+  color: #587080;
+  font-size: 0.57rem;
   font-weight: 700;
 }
 

@@ -35,13 +35,11 @@
           <article class="input-stage input-stage-a" data-step="inputs" aria-label="Replaceable schematic input A">
             <span class="stage-kicker">Input A</span>
             <div class="media-placeholder media-placeholder--input" aria-hidden="true"><span>A</span></div>
-            <span class="schematic-note">replaceable</span>
           </article>
 
           <article class="input-stage input-stage-b" data-step="inputs" aria-label="Replaceable schematic input B">
             <span class="stage-kicker">Input B</span>
             <div class="media-placeholder media-placeholder--input" aria-hidden="true"><span>B</span></div>
-            <span class="schematic-note">replaceable</span>
           </article>
 
           <div class="encoder-stage encoder-stage-a" data-step="encoder" aria-label="Encoder for input A">
@@ -84,11 +82,11 @@
               </header>
               <div class="evolving-views">
                 <div class="evolving-graph-wrap">
-                  <div class="graph-target" id="dependency-graph-a"></div>
                   <div class="hard-state-label" id="hard-label-a" aria-live="polite">
                     <b>Hard MWST</b>
                     <small>posterior structure</small>
                   </div>
+                  <div class="graph-target" id="dependency-graph-a"></div>
                 </div>
                 <div class="matrix-wrap">
                   <span class="matrix-caption" id="matrix-caption-a">Soft &beta;(x,&tau;)<small>edge inclusion probabilities</small></span>
@@ -96,7 +94,7 @@
                   <div class="training-surrogate" data-step="soft">
                     <span class="surrogate-arrow" aria-hidden="true"></span>
                     <b>Training surrogate</b>
-                    <small>&larr; gradient</small>
+                    <small>&#8617; gradient to encoder</small>
                   </div>
                 </div>
               </div>
@@ -108,11 +106,11 @@
               </header>
               <div class="evolving-views">
                 <div class="evolving-graph-wrap">
-                  <div class="graph-target" id="dependency-graph-b"></div>
                   <div class="hard-state-label" id="hard-label-b" aria-live="polite">
                     <b>Hard MWST</b>
                     <small>posterior structure</small>
                   </div>
+                  <div class="graph-target" id="dependency-graph-b"></div>
                 </div>
                 <div class="matrix-wrap">
                   <span class="matrix-caption" id="matrix-caption-b">Soft &beta;(x,&tau;)<small>edge inclusion probabilities</small></span>
@@ -120,7 +118,7 @@
                   <div class="training-surrogate" data-step="soft">
                     <span class="surrogate-arrow" aria-hidden="true"></span>
                     <b>Training surrogate</b>
-                    <small>&larr; gradient</small>
+                    <small>&#8617; gradient to encoder</small>
                   </div>
                 </div>
               </div>
@@ -151,13 +149,11 @@
           <article class="reconstruction-stage reconstruction-stage-a" data-step="recon" aria-label="Replaceable schematic reconstruction A">
             <span class="stage-kicker">Reconstruction</span>
             <div class="media-placeholder media-placeholder--output" aria-hidden="true"><span>A</span></div>
-            <span class="schematic-note">replaceable</span>
           </article>
 
           <article class="reconstruction-stage reconstruction-stage-b" data-step="recon" aria-label="Replaceable schematic reconstruction B">
             <span class="stage-kicker">Reconstruction</span>
             <div class="media-placeholder media-placeholder--output" aria-hidden="true"><span>B</span></div>
-            <span class="schematic-note">replaceable</span>
           </article>
         </div>
 
