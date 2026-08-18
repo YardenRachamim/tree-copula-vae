@@ -115,12 +115,13 @@
 
 .method-workbench {
   --forward-arrow-color: #7894a7;
-  --forward-shaft-length: 8px;
+  --forward-shaft-length: 15px;
   --forward-head-size: 8px;
+  --forward-arrow-overlap: 1px;
   display: grid;
-  grid-template-columns: 100px 60px 448px 112px 55px 119px;
+  grid-template-columns: 100px 60px 480px 112px 55px 119px;
   grid-template-rows: auto minmax(220px, 1fr) minmax(220px, 1fr);
-  column-gap: clamp(0.55rem, 1.4vw, 1rem);
+  column-gap: 22px;
   row-gap: 0.9rem;
   position: relative;
   align-items: stretch;
@@ -231,7 +232,7 @@
 .encoder-stage::before {
   position: absolute;
   top: calc(50% - 4px);
-  left: calc(100% + var(--forward-shaft-length) - 1px);
+  left: calc(100% + var(--forward-shaft-length) - var(--forward-arrow-overlap));
   width: var(--forward-head-size);
   height: var(--forward-head-size);
   content: "";
@@ -241,37 +242,26 @@
 
 .sample-stage::before,
 .decoder-stage::before,
-.reconstruction-stage::before,
-.evolving-graph-wrap::before {
+.reconstruction-stage::before {
   position: absolute;
   top: 50%;
-  left: -14px;
-  width: 6px;
+  left: calc(-1 * (var(--forward-shaft-length) + var(--forward-head-size) - var(--forward-arrow-overlap)));
+  width: var(--forward-shaft-length);
   border-top: 1.5px solid var(--forward-arrow-color);
   content: "";
 }
 
 .sample-stage::after,
 .decoder-stage::after,
-.reconstruction-stage::after,
-.evolving-graph-wrap::after {
+.reconstruction-stage::after {
   position: absolute;
   top: calc(50% - 4px);
-  left: -10px;
+  left: calc(-1 * var(--forward-head-size));
   width: var(--forward-head-size);
   height: var(--forward-head-size);
   content: "";
   background: var(--forward-arrow-color);
   clip-path: polygon(0 0, 100% 50%, 0 100%);
-}
-
-.sample-stage::before {
-  border-top-width: 2px;
-  border-color: var(--figure-teal);
-}
-
-.sample-stage::after {
-  background: var(--figure-teal);
 }
 
 .soft-learning-control {
@@ -385,7 +375,7 @@
 
 .evolving-views {
   display: grid;
-  grid-template-columns: 132px 22px 132px 132px;
+  grid-template-columns: 132px 22px 132px 22px 132px;
   --stage-gap: clamp(0.35rem, 0.9vw, 0.65rem);
   gap: var(--stage-gap);
   min-height: 0;
@@ -399,6 +389,11 @@
   position: relative;
   min-width: 0;
   min-height: 0;
+}
+
+.evolving-graph-wrap::before,
+.evolving-graph-wrap::after {
+  display: none;
 }
 
 .graph-target {
@@ -582,15 +577,15 @@
 }
 
 .matrix-transition::before {
-  width: calc(100% - 7px);
-  border-top: 1.5px solid #7894a7;
+  width: var(--forward-shaft-length);
+  border-top: 1.5px solid var(--forward-arrow-color);
 }
 
 .matrix-transition::after {
   justify-self: end;
-  width: 8px;
-  height: 8px;
-  background: #7894a7;
+  width: var(--forward-head-size);
+  height: var(--forward-head-size);
+  background: var(--forward-arrow-color);
   clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
@@ -612,10 +607,10 @@
 }
 
 .surrogate-arrow {
-  width: 2px;
+  width: 1.5px;
   height: 0.65rem;
   position: relative;
-  background: var(--figure-teal);
+  background: var(--forward-arrow-color);
 }
 
 .surrogate-arrow::after {
@@ -625,7 +620,7 @@
   width: 8px;
   height: 7px;
   content: "";
-  background: var(--figure-teal);
+  background: var(--forward-arrow-color);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
 
@@ -844,10 +839,10 @@
   }
 
   .method-workbench {
-    --forward-shaft-length: 2px;
+    --forward-shaft-length: 13px;
     --forward-head-size: 6px;
     grid-template-columns: 58px 44px 331px 104px 44px 58px;
-    column-gap: 0.5rem;
+    column-gap: 18px;
   }
 
   .media-placeholder {
@@ -855,7 +850,7 @@
   }
 
   .evolving-views {
-    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr);
     --stage-gap: 0.35rem;
   }
 
@@ -866,18 +861,16 @@
 
   .sample-stage::before,
   .decoder-stage::before,
-  .reconstruction-stage::before,
-  .evolving-graph-wrap::before {
-    left: -9px;
-    width: 2px;
+  .reconstruction-stage::before {
+    left: calc(-1 * (var(--forward-shaft-length) + var(--forward-head-size) - var(--forward-arrow-overlap)));
+    width: var(--forward-shaft-length);
   }
 
   .sample-stage::after,
   .decoder-stage::after,
-  .reconstruction-stage::after,
-  .evolving-graph-wrap::after {
+  .reconstruction-stage::after {
     top: calc(50% - 3px);
-    left: -7px;
+    left: calc(-1 * var(--forward-head-size));
   }
 
   .temperature-range span {
@@ -968,8 +961,13 @@
   }
 
   .evolving-views {
-    grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) 16px minmax(0, 1fr);
     --stage-gap: 0.25rem;
+  }
+
+  .method-workbench {
+    --forward-shaft-length: 11px;
+    --forward-head-size: 6px;
   }
 
   .matrix-caption {
