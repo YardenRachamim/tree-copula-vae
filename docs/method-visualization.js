@@ -474,9 +474,9 @@
   function showReadyState() {
     const highTemperature = trainingTemperatures[0];
     figure.classList.add("is-replaying");
-    figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active", "is-training");
-    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.remove("is-visible"));
-    figure.querySelectorAll('[data-step="inputs"], [data-step="encoder"], [data-step="soft"], [data-step="samples"], [data-step="decoder"], [data-step="recon"]').forEach((element) => element.classList.add("is-visible"));
+    figure.classList.remove("is-complete", "is-hard-revealed", "feedback-pulse-active", "is-training");
+    figure.classList.add("is-scores-revealed");
+    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.add("is-visible"));
     slider.value = highTemperature.toFixed(2);
     setTrainingState(0, 0, highTemperature);
     updateTemperature(highTemperature);
@@ -492,8 +492,9 @@
     const highTemperature = trainingTemperatures[0];
     const animationDuration = (duration) => reducedMotion.matches ? 0 : duration * 1.65;
     figure.classList.add("is-replaying");
-    figure.classList.remove("is-complete", "is-scores-revealed", "is-hard-revealed", "feedback-pulse-active");
-    figure.querySelectorAll('[data-step="nodes"], [data-step="soft"]').forEach((element) => element.classList.remove("is-visible"));
+    figure.classList.remove("is-complete", "is-hard-revealed", "feedback-pulse-active");
+    figure.classList.add("is-scores-revealed");
+    figure.querySelectorAll("[data-step]").forEach((element) => element.classList.add("is-visible"));
     pinnedEdge = null;
     clearHighlight();
     setSampling(false);
@@ -504,14 +505,6 @@
     updateTemperature(highTemperature);
     updateEpochCounter(1);
     setRepresentation("scores");
-
-    if (!await pause(animationDuration(320), token)) return;
-    if (!await revealStep("nodes", "Revealing latent variables for both inputs", animationDuration(280), token)) return;
-
-    figure.classList.add("is-scores-revealed");
-    status.textContent = "Revealing pairwise scores and their matching heatmaps";
-    if (!await pause(animationDuration(540), token)) return;
-    if (!await revealStep("soft", "Showing hard posterior trees and soft training marginals", animationDuration(300), token)) return;
 
     setRepresentation("soft");
     status.textContent = "Learning input-specific dependence structures over 10 epochs";
