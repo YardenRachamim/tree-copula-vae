@@ -94,7 +94,8 @@
   setTrainingState(0, 0, Number(slider.value));
   samples.forEach((sample) => {
     renderGraph(`dependency-graph-${sample.id}`, sample);
-    renderMatrix(`dependency-matrix-${sample.id}`, sample);
+    renderMatrix(`score-matrix-${sample.id}`, sample, "scores");
+    renderMatrix(`dependency-matrix-${sample.id}`, sample, "soft");
   });
 
   viewsRendered = true;
@@ -272,12 +273,12 @@
     target.replaceChildren(svg);
   }
 
-  function renderMatrix(targetId, sample) {
+  function renderMatrix(targetId, sample, representation) {
     const target = figure.querySelector(`#${targetId}`);
     const grid = document.createElement("div");
-    grid.className = "score-matrix";
+    grid.className = `score-matrix score-matrix--${representation}`;
     grid.setAttribute("role", "grid");
-    grid.setAttribute("aria-label", `${sample.name} pairwise dependence matrix`);
+    grid.setAttribute("aria-label", `${sample.name} ${representation === "scores" ? "pairwise score" : "soft edge-marginal"} matrix`);
     grid.append(matrixLabel("", "matrix-corner"));
     nodes.forEach((node) => grid.append(matrixLabel(`z${node}`, "matrix-axis", "columnheader")));
 
@@ -295,6 +296,7 @@
         button.className = "matrix-cell";
         button.dataset.edge = edgeId;
         button.dataset.sample = sample.id;
+        button.dataset.representation = representation;
         button.style.setProperty("--edge-index", String(edges.findIndex((edge) => edge.id === edgeId)));
         button.setAttribute("role", "gridcell");
         button.setAttribute("aria-label", edgeAriaLabel(sample, edgeId));
@@ -342,7 +344,8 @@
   function applyRepresentation() {
     samples.forEach((sample) => {
       updateGraph(sample);
-      updateMatrix(sample);
+      updateScoreMatrix(sample);
+      updateSoftMatrix(sample);
     });
   }
 
@@ -368,7 +371,17 @@
     });
   }
 
-  function updateMatrix(sample) {
+  function updateScoreMatrix(sample) {
+    const values = currentScores.get(sample.id);
+    const target = figure.querySelector(`#score-matrix-${sample.id}`);
+    target.querySelectorAll(".matrix-cell").forEach((cell) => {
+      const value = values[cell.dataset.edge];
+      cell.style.setProperty("--strength", value.toFixed(4));
+      cell.setAttribute("aria-label", `${edgeAriaLabel(sample, cell.dataset.edge)}. Pairwise encoder score ${value.toFixed(2)}.`);
+    });
+  }
+
+  function updateSoftMatrix(sample) {
     const values = softMarginals.get(sample.id);
     const target = figure.querySelector(`#dependency-matrix-${sample.id}`);
     target.querySelectorAll(".matrix-cell").forEach((cell) => {
