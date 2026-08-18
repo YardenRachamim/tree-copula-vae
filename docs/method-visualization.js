@@ -29,9 +29,7 @@
 
   const totalEpochs = 10;
   const replayDuration = 5000;
-  const hardRevealDuration = 420;
-  const samplingDuration = 640;
-  const trainingDuration = replayDuration - hardRevealDuration - samplingDuration;
+  const trainingDuration = replayDuration;
   const trainingTemperatures = [1.10, 1.00, 0.90, 0.80, 0.68, 0.56, 0.44, 0.33, 0.23, 0.14];
   const trainingStates = {
     a: [
@@ -530,15 +528,6 @@
       return;
     }
     figure.classList.remove("is-training");
-
-    figure.classList.add("is-hard-revealed");
-    status.textContent = "Emphasizing the final hard maximum-weight spanning trees";
-    if (!await pause(hardRevealDuration, token)) return;
-
-    setSampling(true);
-    status.textContent = "Sampling from the hard-tree posterior";
-    if (!await pause(samplingDuration, token)) return;
-    setSampling(false);
 
     figure.classList.remove("is-replaying");
     figure.classList.add("is-complete");
