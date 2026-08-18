@@ -7,16 +7,14 @@
   --figure-coral: #c75d3d;
   --figure-paper: #fbfdff;
   box-sizing: border-box;
-  width: min(1180px, calc(100vw - 2rem));
-  margin: 2.75rem 50% 2rem;
-  padding: clamp(1rem, 2.5vw, 1.8rem);
+  width: 100%;
+  margin: clamp(4rem, 9vw, 7.5rem) 0 0;
+  padding: clamp(1.25rem, 2.5vw, 2rem) 0;
   color: var(--figure-ink);
-  background-color: var(--figure-paper);
-  background-image: linear-gradient(rgba(33, 109, 156, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(33, 109, 156, 0.035) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background: transparent;
   border-top: 1px solid #cfdce5;
   border-bottom: 1px solid #cfdce5;
-  transform: translateX(-50%);
+  transform: none;
 }
 
 .method-figure *,
@@ -30,7 +28,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 1.25rem;
-  padding-bottom: 0.85rem;
+  padding-bottom: 1.15rem;
   border-bottom: 1px solid var(--figure-line);
 }
 
@@ -107,9 +105,9 @@
 }
 
 .figure-message {
-  margin: 0.82rem 0 0.72rem !important;
+  margin: 1rem 0 1.15rem !important;
   color: var(--figure-ink);
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
@@ -271,7 +269,7 @@
   gap: 1rem;
   position: relative;
   min-width: 0;
-  padding: 0.15rem 0 0.75rem;
+  padding: 0 0 0.65rem;
   border-bottom: 1px solid var(--figure-line);
 }
 
@@ -367,8 +365,8 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding-bottom: 0.25rem;
-  color: var(--figure-ink);
-  font-size: 0.74rem;
+  color: var(--figure-teal);
+  font-size: 0.82rem;
   font-weight: 700;
   border-bottom: 1px solid rgba(203, 216, 229, 0.9);
 }
@@ -384,7 +382,7 @@
 
 .evolving-views {
   display: grid;
-  grid-template-columns: 132px 22px 132px 22px 132px;
+  grid-template-columns: 108px 18px 104px 18px minmax(154px, 1fr);
   --stage-gap: clamp(0.35rem, 0.9vw, 0.65rem);
   gap: var(--stage-gap);
   min-height: 0;
@@ -409,7 +407,7 @@
   flex: 0 0 auto;
   width: 100%;
   height: auto;
-  aspect-ratio: 1;
+  aspect-ratio: 1.08;
   min-width: 0;
   min-height: 0;
 }
@@ -511,7 +509,7 @@
   flex: 0 0 auto;
   margin-bottom: 0.2rem;
   color: var(--figure-teal);
-  font-size: 0.72rem;
+  font-size: 0.86rem;
   line-height: 1.1;
   text-align: center;
   opacity: 0;
@@ -521,7 +519,7 @@
 
 .hard-state-label small {
   color: var(--figure-muted);
-  font-size: 0.58rem;
+  font-size: 0.63rem;
   font-weight: 600;
 }
 
@@ -645,7 +643,7 @@
   min-height: 1.9em;
   width: 100%;
   color: var(--figure-muted);
-  font-size: 0.59rem;
+  font-size: 0.55rem;
   font-weight: 700;
   line-height: 1.15;
   text-align: center;
@@ -927,7 +925,7 @@
 
 @media (max-width: 560px) {
   .method-figure {
-    width: calc(100vw - 1rem);
+    width: 100%;
     margin-top: 2rem;
     padding: 0.9rem;
   }

@@ -4,18 +4,47 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Beyond Mean-Field: Tree-Copula Variational Autoencoders for Structured Latent Dependencies</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="method-visualization.css" />
+    <link rel="stylesheet" href="style.css?v=20260819" />
+    <link rel="stylesheet" href="method-visualization.css?v=20260819" />
   </head>
   <body>
     <main class="page">
-      <h1>Beyond Mean-Field: Tree-Copula Variational Autoencoders for Structured Latent Dependencies</h1>
-      <p class="authors">Yarden Rachamim and Shai Fine</p>
-      <ul class="links">
-        <li><a href="https://proceedings.mlr.press/v337/rachamim26a.html">Paper</a></li>
-        <li><a href="https://github.com/YardenRachamim/tree-copula-vae/tree/main">Source code</a></li>
-        <li><a href="assets/uai2026_a0_poster.pdf">Poster</a></li>
-      </ul>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">UAI 2026</p>
+          <h1 id="page-title">Beyond Mean-Field: Tree-Copula Variational Autoencoders for Structured Latent Dependencies</h1>
+          <p class="authors">Yarden Rachamim <span aria-hidden="true">&middot;</span> Shai Fine</p>
+          <p class="affiliation">Reichman University <span aria-hidden="true">&middot;</span> UAI 2026</p>
+          <p class="positioning">A VAE posterior whose dependency tree adapts to each input.</p>
+          <nav class="project-actions" aria-label="Project resources">
+            <a href="https://proceedings.mlr.press/v337/rachamim26a.html">Paper</a>
+            <a href="https://github.com/YardenRachamim/tree-copula-vae/tree/main">Code</a>
+            <a href="assets/uai2026_a0_poster.pdf">Poster</a>
+          </nav>
+        </div>
+
+        <figure class="hero-tree-comparison" aria-labelledby="hero-tree-caption">
+          <figcaption id="hero-tree-caption">Input-specific latent structures</figcaption>
+          <div class="hero-tree-row">
+            <div class="hero-input">Input A</div>
+            <span class="hero-arrow" aria-hidden="true"></span>
+            <svg class="hero-tree hero-tree-a" viewBox="0 0 180 120" role="img" aria-label="Input A induces one latent dependency tree">
+              <line x1="45" y1="30" x2="90" y2="60"></line><line x1="90" y1="60" x2="140" y2="28"></line><line x1="90" y1="60" x2="132" y2="98"></line>
+              <circle cx="45" cy="30" r="12"></circle><circle cx="90" cy="60" r="12"></circle><circle cx="140" cy="28" r="12"></circle><circle cx="132" cy="98" r="12"></circle>
+            </svg>
+            <span class="hero-tree-label">latent tree A</span>
+          </div>
+          <div class="hero-tree-row">
+            <div class="hero-input hero-input-b">Input B</div>
+            <span class="hero-arrow" aria-hidden="true"></span>
+            <svg class="hero-tree hero-tree-b" viewBox="0 0 180 120" role="img" aria-label="Input B induces a different latent dependency tree">
+              <line x1="42" y1="29" x2="84" y2="92"></line><line x1="84" y1="92" x2="140" y2="92"></line><line x1="140" y1="92" x2="137" y2="28"></line>
+              <circle cx="42" cy="29" r="12"></circle><circle cx="84" cy="92" r="12"></circle><circle cx="140" cy="92" r="12"></circle><circle cx="137" cy="28" r="12"></circle>
+            </svg>
+            <span class="hero-tree-label">latent tree B</span>
+          </div>
+        </figure>
+      </section>
       <section class="method-figure" id="method-figure" aria-labelledby="method-title">
         <header class="method-figure-header">
           <div>
@@ -191,11 +220,14 @@
         <div class="sr-only" id="method-status" aria-live="polite"></div>
       </section>
       <section class="poster" aria-labelledby="poster-title">
-        <h2 id="poster-title">Poster</h2>
+        <div class="poster-intro">
+          <p class="eyebrow">UAI 2026 Poster</p>
+          <h2 id="poster-title">Want the full story?</h2>
+        </div>
         <a class="poster-preview" href="assets/uai2026_a0_poster.pdf" target="_blank" rel="noopener">
           <img src="assets/uai2026_poster.png" alt="Poster for Beyond Mean-Field: Tree-Copula Variational Autoencoders for Structured Latent Dependencies" />
         </a>
-        <a class="poster-pdf-link" href="assets/uai2026_a0_poster.pdf" target="_blank" rel="noopener">View / download full-resolution poster (PDF)</a>
+        <a class="poster-pdf-link" href="assets/uai2026_a0_poster.pdf" target="_blank" rel="noopener">Open full-resolution poster (PDF)</a>
       </section>
     </main>
     <script src="method-visualization.js" defer></script>
