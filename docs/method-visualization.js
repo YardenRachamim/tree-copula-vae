@@ -74,6 +74,7 @@
   const slider = figure.querySelector("#tree-temperature");
   const temperatureValue = figure.querySelector("#temperature-value");
   const epochCounter = figure.querySelector("#epoch-counter");
+  const sampleEpochCounters = figure.querySelectorAll(".sample-epoch");
   const epochProgress = figure.querySelector("#epoch-progress");
   const replayButton = figure.querySelector("#method-replay");
   const tooltip = figure.querySelector("#edge-tooltip");
@@ -567,6 +568,9 @@
 
   function updateEpochCounter(epoch) {
     epochCounter.textContent = `Epoch ${epoch} / ${totalEpochs}`;
+    sampleEpochCounters.forEach((counter) => {
+      counter.textContent = `Epoch ${epoch}`;
+    });
     epochProgress.querySelectorAll(".epoch-progress-dot").forEach((dot, index) => {
       dot.classList.toggle("is-complete", index < epoch - 1);
       dot.classList.toggle("is-active", index === epoch - 1);

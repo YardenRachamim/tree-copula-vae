@@ -373,6 +373,15 @@
   border-bottom: 1px solid rgba(203, 216, 229, 0.9);
 }
 
+.sample-epoch {
+  color: var(--figure-teal);
+  font: inherit;
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .evolving-views {
   display: grid;
   grid-template-columns: 132px 22px 132px 22px 132px;
