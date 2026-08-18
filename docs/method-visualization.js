@@ -78,6 +78,8 @@
   const tooltip = figure.querySelector("#edge-tooltip");
   const status = figure.querySelector("#method-status");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const narrowViewport = window.matchMedia("(max-width: 700px)");
+  const coarsePointer = window.matchMedia("(pointer: coarse)");
   const allTrees = enumerateSpanningTrees();
   const softMarginals = new Map();
   const currentScores = new Map();
@@ -108,6 +110,16 @@
     status.textContent = `Soft tree probabilities updated for temperature ${Number(slider.value).toFixed(2)}`;
   });
   replayButton.addEventListener("click", replay);
+  figure.addEventListener("click", (event) => {
+    if (!coarsePointer.matches || !pinnedEdge || event.target.closest("[data-edge], button, input, label, output, a, [role='button']")) {
+      return;
+    }
+    pinnedEdge = null;
+    clearHighlight();
+  });
+  window.addEventListener("resize", schedulePinnedTooltipReposition);
+  window.addEventListener("orientationchange", schedulePinnedTooltipReposition);
+  window.visualViewport?.addEventListener("resize", schedulePinnedTooltipReposition);
   showReadyState();
 
   function enumerateSpanningTrees() {
@@ -468,11 +480,45 @@
     tooltip.hidden = false;
 
     const rect = anchor.getBoundingClientRect();
+    if (narrowViewport.matches || coarsePointer.matches) {
+      positionMobileTooltip(rect);
+      return;
+    }
     const tooltipWidth = 210;
     const left = Math.max(12, Math.min(rect.left + rect.width / 2 - tooltipWidth / 2, window.innerWidth - tooltipWidth - 12));
     const top = Math.max(12, rect.top - 135);
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
+  }
+
+  function positionMobileTooltip(anchorRect) {
+    const viewportMargin = 12;
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const maximumLeft = Math.max(viewportMargin, window.innerWidth - tooltipRect.width - viewportMargin);
+    const maximumTop = Math.max(viewportMargin, window.innerHeight - tooltipRect.height - viewportMargin);
+    const centeredLeft = anchorRect.left + anchorRect.width / 2 - tooltipRect.width / 2;
+    const aboveTop = anchorRect.top - tooltipRect.height - 10;
+    const preferredTop = aboveTop >= viewportMargin ? aboveTop : anchorRect.bottom + 10;
+    const left = Math.max(viewportMargin, Math.min(centeredLeft, maximumLeft));
+    const top = Math.max(viewportMargin, Math.min(preferredTop, maximumTop));
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  function repositionPinnedTooltip() {
+    if (!coarsePointer.matches || !pinnedEdge) {
+      return;
+    }
+    if (!pinnedEdge.anchor.isConnected) {
+      pinnedEdge = null;
+      clearHighlight();
+      return;
+    }
+    showTooltip(pinnedEdge.sampleId, pinnedEdge.edgeId, pinnedEdge.anchor);
+  }
+
+  function schedulePinnedTooltipReposition() {
+    window.requestAnimationFrame(repositionPinnedTooltip);
   }
 
   function setSampling(isSampling) {
