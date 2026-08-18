@@ -384,7 +384,7 @@
 
 .evolving-views {
   display: grid;
-  grid-template-columns: minmax(92px, 0.7fr) 22px minmax(102px, 0.8fr) minmax(220px, 1.7fr);
+  grid-template-columns: minmax(102px, 0.8fr) 22px minmax(102px, 0.8fr) minmax(220px, 1.7fr);
   --stage-gap: clamp(0.35rem, 0.9vw, 0.65rem);
   gap: var(--stage-gap);
   min-height: 0;
@@ -568,6 +568,14 @@
   align-self: start;
 }
 
+.matrix-object {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.42rem;
+  width: 100%;
+}
+
 .matrix-transition {
   display: grid;
   place-items: center;
@@ -644,6 +652,7 @@
 
 .matrix-caption {
   min-height: 1.9em;
+  width: 100%;
   color: var(--figure-muted);
   font-size: 0.59rem;
   font-weight: 700;
@@ -857,7 +866,7 @@
   }
 
   .evolving-views {
-    grid-template-columns: minmax(74px, 0.75fr) 18px minmax(82px, 0.85fr) minmax(160px, 1.7fr);
+    grid-template-columns: minmax(82px, 0.85fr) 18px minmax(82px, 0.85fr) minmax(160px, 1.7fr);
     --stage-gap: 0.35rem;
   }
 
@@ -949,7 +958,7 @@
   }
 
   .evolving-views {
-    grid-template-columns: minmax(64px, 0.75fr) 16px minmax(72px, 0.85fr) minmax(130px, 1.7fr);
+    grid-template-columns: minmax(72px, 0.85fr) 16px minmax(72px, 0.85fr) minmax(130px, 1.7fr);
     --stage-gap: 0.25rem;
   }
 
