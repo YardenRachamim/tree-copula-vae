@@ -210,7 +210,7 @@
     const target = figure.querySelector(`#${targetId}`);
     const svg = svgElement("svg", {
       class: "latent-graph",
-      viewBox: "0 0 360 280",
+      viewBox: "20 10 320 260",
       role: "img",
       "aria-label": `${sample.name} illustrative latent dependence graph`,
     });
@@ -264,7 +264,7 @@
         "data-sample": sample.id,
       });
       nodeGroup.append(
-        svgElement("circle", { class: "node-disc", cx: x, cy: y, r: 24 }),
+        svgElement("circle", { class: "node-disc", cx: x, cy: y, r: 25 }),
         svgText({ class: "node-symbol", x, y: y + 6, "text-anchor": "middle" }, `z${node}`),
       );
       svg.append(nodeGroup);
@@ -358,7 +358,7 @@
       group.classList.toggle("is-hard-selected", isHardEdge);
       if (isHardEdge) {
         line.style.stroke = "#0d7d77";
-        line.style.strokeWidth = "7px";
+        line.style.strokeWidth = "5px";
         line.style.opacity = "1";
       } else {
         line.style.stroke = "transparent";
